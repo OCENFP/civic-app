@@ -51,6 +51,7 @@ export default function StateLawCard() {
         <ul>
           <li>Required to show ID when stopped: {law.id_required ? "Yes" : "No"}</li>
           <li>Stop-and-identify state: {law.stop_and_identify ? "Yes" : "No"}</li>
+          {law.search_rules && <li>Searches: {law.search_rules}</li>}
         </ul>
       )}
 
