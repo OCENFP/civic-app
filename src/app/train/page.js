@@ -7,6 +7,7 @@ import ScenarioCard from "../../components/ScenarioCard";
 import TrainingResult from "../../components/TrainingResult";
 import scenarios from "../../data/scenarios.json";
 import { updateProgress } from "../../engine/trainEngine";
+import { playSound } from "../../engine/sound";
 import { getUser } from "../../lib/auth";
 
 export default function TrainPage() {
@@ -23,6 +24,7 @@ export default function TrainPage() {
 
   function handleChoice(choice) {
     setFeedback(choice.feedback);
+    playSound(choice.correct ? "correct" : "incorrect");
     updateProgress({ correct: choice.correct, user });
     setStepId(choice.next);
   }

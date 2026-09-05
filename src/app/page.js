@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Navbar from "../components/Navbar";
 import Loader from "../components/Loader";
+import { speak } from "../engine/voice";
 
 export default function Home() {
   const [question, setQuestion] = useState("");
@@ -51,7 +52,18 @@ export default function Home() {
         </button>
       </form>
 
-      {loading ? <Loader /> : answer && <p style={{ whiteSpace: "pre-wrap" }}>{answer}</p>}
+      {loading ? (
+        <Loader />
+      ) : (
+        answer && (
+          <div>
+            <p style={{ whiteSpace: "pre-wrap" }}>{answer}</p>
+            <button className="linklike" onClick={() => speak(answer)}>
+              🔊 Read aloud
+            </button>
+          </div>
+        )
+      )}
 
       <p style={{ marginTop: "20px" }}>
         Want to practice under pressure? <Link href="/train">Start training →</Link>
