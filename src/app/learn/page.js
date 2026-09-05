@@ -23,7 +23,7 @@ export default function Learn() {
               <p><span className="label">Example:</span> {lesson.example}</p>
               <p><span className="label">Risk:</span> {lesson.risk}</p>
               <p><span className="label">Do:</span> {lesson.action}</p>
-              <p><span className="label">Say:</span> "{lesson.script}"</p>
+              <p><span className="label">Say:</span> &ldquo;{lesson.script}&rdquo;</p>
             </div>
           ))}
         </div>

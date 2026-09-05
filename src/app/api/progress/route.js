@@ -1,10 +1,6 @@
-import OpenAI from "openai";
+import { openai } from "../../../lib/openai";
 import { supabase } from "../../../lib/supabase";
 import data from "../../../data/constitution.json";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 // Simple keyword search (we will upgrade to embeddings next)
 function simpleSearch(query) {

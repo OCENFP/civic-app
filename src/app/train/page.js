@@ -1,12 +1,45 @@
 "use client";
 
+import { useState } from "react";
 import ProtectedRoute from "../../components/ProtectedRoute";
+import Navbar from "../../components/Navbar";
+import ScenarioCard from "../../components/ScenarioCard";
+import scenarios from "../../data/scenarios.json";
+import { updateProgress } from "../../engine/trainEngine";
 
 export default function TrainPage() {
+  const scenario = scenarios[0];
+  const [stepId, setStepId] = useState("start");
+  const [feedback, setFeedback] = useState("");
+
+  const step = scenario.steps[stepId];
+
+  function handleChoice(choice) {
+    setFeedback(choice.feedback);
+    updateProgress({ correct: choice.correct, user: null });
+    setStepId(choice.next);
+  }
+
+  function restart() {
+    setStepId("start");
+    setFeedback("");
+  }
+
   return (
     <ProtectedRoute>
       <div>
-        <h1>Training</h1>
+        <Navbar />
+
+        <h1>{scenario.title}</h1>
+        <p>{scenario.description}</p>
+
+        <ScenarioCard step={step} feedback={feedback} onChoice={handleChoice} />
+
+        {step?.end && (
+          <button className="btn" onClick={restart}>
+            Try Again
+          </button>
+        )}
       </div>
     </ProtectedRoute>
   );
