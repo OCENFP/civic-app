@@ -22,9 +22,15 @@ client = OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
 # -----------------------
 app = FastAPI(title="Civic API", version="1.0")
 
+# Origins are read from ALLOWED_ORIGINS (comma-separated) so credentialed
+# requests get a real allowlist instead of "*", which browsers reject when
+# allow_credentials is True.
+_allowed = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000")
+ALLOWED_ORIGINS = [o.strip() for o in _allowed.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # tighten later for production
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
