@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from openai import OpenAI
 import os
 import json
@@ -150,6 +151,29 @@ Respond clearly:
         "answer": answer,
         "source": section["title"] if section else "None"
     }
+
+
+class AskBody(BaseModel):
+    question: str
+
+
+# POST variant so clients can send the question in a JSON body.
+@app.post("/ask")
+def ask_post(body: AskBody):
+    return ask(body.question)
+
+
+# -----------------------
+# LEARN
+# -----------------------
+@app.get("/learn")
+def learn(topic: str = ""):
+    section = find_relevant_section(topic)
+
+    if not section:
+        return {"topic": topic, "result": None, "message": "No matching section found."}
+
+    return {"topic": topic, "result": section}
 
 # -----------------------
 # REPRESENTATIVES

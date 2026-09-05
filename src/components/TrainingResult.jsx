@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Modal from "./ui/Modal";
 import { coach } from "../engine/ai/coachEngine";
 import { shareTrainingResult } from "../engine/growth/ViralEngine";
 import { loadProgress, calculateLevel } from "../engine/storage";
+import { startListening, isListeningSupported } from "../engine/voice";
 
 // Shown when a training scenario ends: share the result and get AI coaching
 // on how the user would phrase their response out loud.
@@ -13,6 +14,13 @@ export default function TrainingResult() {
   const [feedback, setFeedback] = useState("");
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [listening, setListening] = useState(false);
+  const [canListen, setCanListen] = useState(false);
+
+  useEffect(() => {
+    // Defer past the effect tick to avoid a synchronous cascading render.
+    Promise.resolve().then(() => setCanListen(isListeningSupported()));
+  }, []);
 
   function share() {
     const p = loadProgress();
@@ -21,6 +29,17 @@ export default function TrainingResult() {
       streak: p.streak,
       grade: `Level ${calculateLevel(p.xp)}`,
     });
+  }
+
+  function listen() {
+    setListening(true);
+    startListening(
+      (transcript) => {
+        setWords((w) => (w ? `${w} ${transcript}` : transcript));
+        setListening(false);
+      },
+      () => setListening(false)
+    );
   }
 
   async function getFeedback() {
@@ -39,7 +58,7 @@ export default function TrainingResult() {
   return (
     <div className="card">
       <h3>Practice what you&apos;d say</h3>
-      <p>Type how you would respond out loud, and get AI coaching on it.</p>
+      <p>Type or speak how you would respond out loud, and get AI coaching on it.</p>
 
       <textarea
         value={words}
@@ -52,6 +71,11 @@ export default function TrainingResult() {
         <button className="btn" onClick={getFeedback} disabled={loading}>
           {loading ? "Coaching..." : "Get AI feedback"}
         </button>
+        {canListen && (
+          <button className="btn" onClick={listen} disabled={listening}>
+            {listening ? "Listening..." : "🎤 Speak"}
+          </button>
+        )}
         <button className="btn" onClick={share}>
           Share result
         </button>
