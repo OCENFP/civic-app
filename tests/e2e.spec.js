@@ -56,6 +56,21 @@ test("leaderboard renders without crashing when the backend is unavailable", asy
   ).toBeVisible();
 });
 
+test("civic data page renders and degrades gracefully without the backend", async ({ page }) => {
+  await page.goto("/civic");
+  await expect(page.getByRole("heading", { name: "Civic Data" })).toBeVisible();
+
+  await page.getByRole("button", { name: "Load Recent Votes" }).click();
+  await expect(
+    page.getByText(/unreachable|No votes available/i)
+  ).toBeVisible({ timeout: 15_000 });
+});
+
+test("admin scenario generator requires login", async ({ page }) => {
+  await page.goto("/admin");
+  await page.waitForURL("**/login");
+});
+
 test("login page renders and links to signup", async ({ page }) => {
   await page.goto("/login");
   await expect(page.getByPlaceholder("Email")).toBeVisible();

@@ -47,7 +47,9 @@ payments activate once the corresponding keys are set in `.env.local`
 - `/leaderboard` — top users by XP (Supabase `users` table)
 - `/login`, `/signup` — Supabase auth (email/password + Google OAuth)
 - `/dashboard`, `/chat`, `/profile` — protected (require login)
-- `/onboarding`, `/admin` — onboarding flow and scenario generator
+- `/civic` — representatives, bill search, recent votes (needs the FastAPI
+  backend; set `NEXT_PUBLIC_BACKEND_URL`, default `http://localhost:10000`)
+- `/onboarding` — first-run flow; `/admin` — scenario generator (login required)
 - API: `/api/ask`, `/api/auth`, `/api/daily`, `/api/embeddings`,
   `/api/generate`, `/api/laws?state=texas`, `/api/progress`,
   `/api/stripe`, `/api/voice`

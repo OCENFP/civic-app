@@ -14,6 +14,7 @@ export default function Navbar() {
         <Link href="/">Ask</Link>
         <Link href="/learn">Learn</Link>
         <Link href="/train">Train</Link>
+        <Link href="/civic">Civic Data</Link>
         <Link href="/leaderboard">Leaderboard</Link>
         {user ? (
           <>
