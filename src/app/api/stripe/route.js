@@ -1,6 +1,19 @@
 import { stripe } from "../../../lib/stripe";
+import { withErrorHandling } from "../../../lib/errorHandler";
 
-export async function POST() {
+// Resolve the site's base URL from the request instead of hardcoding
+// localhost, so success/cancel redirects work in every environment.
+function baseUrl(req) {
+  return (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    req.headers.get("origin") ||
+    "http://localhost:3000"
+  );
+}
+
+export const POST = withErrorHandling(async (req) => {
+  const origin = baseUrl(req);
+
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
     mode: "subscription",
@@ -15,9 +28,9 @@ export async function POST() {
         quantity: 1,
       },
     ],
-    success_url: "http://localhost:3000",
-    cancel_url: "http://localhost:3000",
+    success_url: `${origin}/dashboard?checkout=success`,
+    cancel_url: `${origin}/?checkout=cancelled`,
   });
 
   return Response.json({ url: session.url });
-}
+});
