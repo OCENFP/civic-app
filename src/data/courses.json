@@ -38,5 +38,45 @@
         ]
       }
     ]
+  },
+  {
+    "id": "speech_and_assembly",
+    "title": "Speech & Assembly",
+    "description": "Your First Amendment rights in public \u2014 speaking, recording, and protesting",
+    "modules": [
+      {
+        "id": "public_expression",
+        "title": "Expression in Public",
+        "lessons": [
+          {
+            "title": "Peaceful Assembly",
+            "explanation": "You may gather peacefully in traditional public forums like sidewalks and parks",
+            "when_applies": "Protests, rallies, and demonstrations in public spaces",
+            "example": "Joining a march on a public sidewalk",
+            "risk": "Blocking traffic or entrances can turn lawful assembly into a citable offense",
+            "action": "Stay on public property and keep pathways clear",
+            "script": "We are assembling peacefully on public property."
+          },
+          {
+            "title": "Recording in Public",
+            "explanation": "You generally may record police performing their duties in public",
+            "when_applies": "Witnessing or being part of a public police encounter",
+            "example": "Filming an arrest from a safe distance",
+            "risk": "Interfering with the officer's work can lead to arrest even while recording lawfully",
+            "action": "Record from a distance and never physically interfere",
+            "script": "I am recording from a lawful distance and not interfering."
+          },
+          {
+            "title": "Dispersal Orders",
+            "explanation": "Police may order a crowd to disperse when an assembly is declared unlawful",
+            "when_applies": "A protest is declared an unlawful assembly",
+            "example": "Officers announce everyone must leave the area",
+            "risk": "Remaining after a lawful dispersal order can mean arrest",
+            "action": "Note the order, leave calmly, and document what you saw",
+            "script": "I am complying and leaving the area now."
+          }
+        ]
+      }
+    ]
   }
 ]

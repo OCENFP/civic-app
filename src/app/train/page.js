@@ -1,17 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import scenarios from "../../data/scenarios.json";
 import ScenarioCard from "../../components/ScenarioCard";
+import Loader from "../../components/Loader";
 import { updateProgress } from "../../engine/trainEngine";
 import { playSound } from "../../engine/sound";
 import { shareResult } from "../../engine/share";
 import { generateShare } from "../../engine/growth/growthEngine";
 import { useAuth } from "../../components/auth/AuthProvider";
 
-export default function TrainPage() {
+function Trainer() {
   const { user } = useAuth();
-  const [scenario, setScenario] = useState(null);
+  const searchParams = useSearchParams();
+  // Deep links from the daily challenge: /train?scenario=<id>
+  const [scenario, setScenario] = useState(
+    () => scenarios.find((s) => s.id === searchParams.get("scenario")) ?? null
+  );
   const [stepId, setStepId] = useState("start");
   const [feedback, setFeedback] = useState("");
   const [score, setScore] = useState(0);
@@ -103,5 +109,13 @@ export default function TrainPage() {
 
       {feedback && <p><em>{feedback}</em></p>}
     </div>
+  );
+}
+
+export default function TrainPage() {
+  return (
+    <Suspense fallback={<Loader />}>
+      <Trainer />
+    </Suspense>
   );
 }

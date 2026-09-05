@@ -32,6 +32,12 @@ test("training scenario plays through to a win", async ({ page }) => {
   await expect(page.getByText("Correct choices: 2")).toBeVisible();
 });
 
+test("daily-challenge deep link preselects its scenario", async ({ page }) => {
+  await page.goto("/train?scenario=door_knock_branching");
+  await expect(page.getByRole("heading", { name: "Police at Your Door" })).toBeVisible();
+  await expect(page.getByText("Mind if we come in")).toBeVisible();
+});
+
 test("onboarding ends on Start Training, not a blank step", async ({ page }) => {
   await page.goto("/onboarding");
   await page.getByRole("button", { name: "Next" }).click();

@@ -9,12 +9,12 @@ import { useProgress } from "../../../engine/useProgress";
 export default function Dashboard() {
   const { user } = useAuth();
   const progress = useProgress();
-  const [challenge, setChallenge] = useState("");
+  const [daily, setDaily] = useState(null);
 
   useEffect(() => {
     fetch("/api/daily")
       .then((r) => r.json())
-      .then((d) => setChallenge(d.challenge))
+      .then((d) => setDaily(d))
       .catch(() => {});
   }, []);
 
@@ -25,8 +25,21 @@ export default function Dashboard() {
 
       <div className="card">
         <h2>Today&apos;s Challenge</h2>
-        <p>{challenge || "Loading..."}</p>
-        <Link href="/train" className="btn">Start Training</Link>
+        <p>
+          {daily ? (
+            <>
+              <strong>{daily.title}</strong> — {daily.challenge}
+            </>
+          ) : (
+            "Loading..."
+          )}
+        </p>
+        <Link
+          href={daily ? `/train?scenario=${daily.scenarioId}` : "/train"}
+          className="btn"
+        >
+          Start Training
+        </Link>
       </div>
 
       <div className="card">
