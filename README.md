@@ -89,5 +89,9 @@ python3 district_lookup.py         # look up reps by ZIP
 ```bash
 cd frontend/mobile
 npm install
-npx expo start
+EXPO_PUBLIC_API_URL=http://<your-machine-ip>:3000 npx expo start
 ```
+
+The home tab asks the web app's `/api/ask` endpoint. `EXPO_PUBLIC_API_URL`
+must point at a reachable instance of the web app (a device can't reach
+`localhost`); it defaults to `http://localhost:3000` for web preview.
