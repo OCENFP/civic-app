@@ -35,6 +35,7 @@ function RepresentativesSection() {
           value={address}
           onChange={(e) => setAddress(e.target.value)}
           placeholder="State or address (optional)"
+          aria-label="State or address"
         />
         <button type="submit" disabled={loading}>Find Representatives</button>
       </form>
@@ -79,6 +80,7 @@ function BillsSection() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="e.g. privacy, voting, healthcare"
+          aria-label="Bill search query"
         />
         <button type="submit" disabled={loading}>Search</button>
       </form>

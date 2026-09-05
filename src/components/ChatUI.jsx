@@ -107,6 +107,7 @@ export default function ChatUI() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="e.g. Can police search my car?"
+          aria-label="Your question"
           style={{ flex: 1 }}
         />
         {voiceReady.listen && (

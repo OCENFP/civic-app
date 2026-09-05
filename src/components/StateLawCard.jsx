@@ -38,7 +38,7 @@ export default function StateLawCard() {
       <h2>Your State&apos;s Rules</h2>
       <p>Stop-and-identify laws differ by state. Check yours:</p>
 
-      <select value={selected} onChange={(e) => lookup(e.target.value)}>
+      <select aria-label="State" value={selected} onChange={(e) => lookup(e.target.value)}>
         <option value="">Select a state…</option>
         {states.map((s) => (
           <option key={s} value={s}>

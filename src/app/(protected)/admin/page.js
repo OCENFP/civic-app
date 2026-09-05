@@ -24,6 +24,7 @@ export default function Admin() {
         value={topic}
         onChange={(e) => setTopic(e.target.value)}
         placeholder="Scenario topic"
+          aria-label="Scenario topic"
       />
 
       <button onClick={generate}>Generate Scenario</button>

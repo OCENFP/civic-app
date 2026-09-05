@@ -38,6 +38,7 @@ export default function Login() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"
+          aria-label="Email"
           required
         />
         <input
@@ -45,6 +46,7 @@ export default function Login() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
+          aria-label="Password"
           required
         />
         <button type="submit" className="btn">Log In</button>

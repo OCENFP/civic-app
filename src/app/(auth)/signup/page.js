@@ -37,6 +37,7 @@ export default function Signup() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"
+          aria-label="Email"
           required
         />
         <input
@@ -44,6 +45,7 @@ export default function Signup() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password (6+ characters)"
+          aria-label="Password"
           minLength={6}
           required
         />
