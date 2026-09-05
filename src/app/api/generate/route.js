@@ -1,7 +1,13 @@
 import { askAI } from "../../../lib/openai";
+import { apiError, withErrorHandling } from "../../../lib/errorHandler";
 
-export async function POST(req) {
+// POST { topic } → { scenario }  (admin scenario generator)
+export const POST = withErrorHandling(async (req) => {
   const { topic } = await req.json();
+
+  if (typeof topic !== "string" || !topic.trim()) {
+    return apiError("topic must be a non-empty string", 400);
+  }
 
   const prompt = `
 Create a branching training scenario about: ${topic}
@@ -12,7 +18,7 @@ Include:
 - consequences
 `;
 
-  const result = await askAI(prompt);
+  const scenario = await askAI(prompt);
 
-  return Response.json({ scenario: result });
-}
+  return Response.json({ scenario });
+});

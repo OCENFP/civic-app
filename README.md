@@ -1,39 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Know Your Rights AI
 
-## Getting Started
+A civic-education app that helps people understand and exercise their rights in
+real-world situations — AI Q&A grounded in constitutional/legal data, branching
+training scenarios, lessons, and a leaderboard.
 
-First, run the development server:
+## Stack
+
+- **Frontend / API:** Next.js 16 (App Router) + React 19, plain JavaScript
+- **Auth & DB:** Supabase (`@supabase/supabase-js`)
+- **AI:** OpenAI (chat + embeddings)
+- **Payments:** Stripe
+- **Backend service:** a separate Python/FastAPI app in `backend/` (civic data:
+  representatives, bills, votes)
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # then fill in real values
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app builds and runs without any secrets configured — Supabase falls back to
+a non-functional placeholder client (with a console warning) and AI/Stripe
+routes only fail when actually called. Set the variables in `.env.local` to make
+those features work.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+See `.env.example`. `NEXT_PUBLIC_*` values are inlined into the browser bundle at
+build time; the rest are server-only.
 
-## Learn More
+| Variable | Purpose |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key |
+| `OPENAI_API_KEY` | AI Q&A, embeddings, scenario generation |
+| `STRIPE_SECRET_KEY` | Pro subscription checkout |
 
-To learn more about Next.js, take a look at the following resources:
+## Scripts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run dev     # dev server
+npm run build   # production build
+npm run start   # serve the production build
+npm run lint    # eslint
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Routes
 
-## Deploy on Vercel
+- `/` — ask a rights question
+- `/learn` — lessons
+- `/train` — branching training scenarios
+- `/chat` — AI chat (protected)
+- `/dashboard`, `/profile` — progress (protected)
+- `/leaderboard` — top users
+- `/login`, `/signup` — auth
+- `/admin` — scenario generator
+- `/api/*` — ask, auth, embeddings, laws, progress, generate, stripe, voice, daily
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Python backend (`backend/`)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# TheFreedomPartyUSA
-# TheFreedomPartyUSA
-# TheFreedomPartyUSA
+```bash
+cd backend
+python3 -m venv venv
+venv/bin/pip install -r requirements.txt
+OPENAI_API_KEY=... ./start.sh   # uvicorn on port 10000
+```
+
+Boots and serves without an OpenAI key (`/health` reports `openai_configured:false`).

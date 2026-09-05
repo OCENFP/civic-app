@@ -41,6 +41,16 @@ body {
   font-size: 18px;
 }
 
+.linklike {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #0645ad;
+  cursor: pointer;
+  font: inherit;
+  text-decoration: underline;
+}
+
 input {
   padding: 10px;
   border: 1px solid #ccc;
