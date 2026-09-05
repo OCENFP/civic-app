@@ -4,6 +4,20 @@ import { useState } from "react";
 import Loader from "./Loader";
 import { authHeaders } from "../lib/auth";
 import { speak, startListening, useVoiceSupport } from "../engine/voiceEngine";
+import { findBestMatch } from "../engine/ai/queryEngine";
+import scripts from "../data/scripts.json";
+
+// Keyword-matched fallback so the chat still teaches something when the
+// AI backend is unreachable or unconfigured.
+function offlineAnswer(question) {
+  const match = findBestMatch(question, scripts);
+  if (!match) return null;
+  return {
+    role: "ai",
+    text: `(Offline answer — AI unavailable)\n\n${match.explanation}.\n\nYour rights: ${match.rights}.\nWhat to do: ${match.action}.\nWhat you can say: "${match.script}"`,
+    sources: [match.law],
+  };
+}
 
 export default function ChatUI() {
   const [messages, setMessages] = useState([]);
@@ -29,16 +43,24 @@ export default function ChatUI() {
       });
       const data = await res.json();
 
+      if (data.answer) {
+        setMessages((m) => [
+          ...m,
+          { role: "ai", text: data.answer, sources: data.sources },
+        ]);
+      } else {
+        const fallback = offlineAnswer(question);
+        setMessages((m) => [
+          ...m,
+          fallback ?? { role: "ai", text: data.error || "Something went wrong." },
+        ]);
+      }
+    } catch {
+      const fallback = offlineAnswer(question);
       setMessages((m) => [
         ...m,
-        {
-          role: "ai",
-          text: data.answer || data.error || "Something went wrong.",
-          sources: data.sources,
-        },
+        fallback ?? { role: "ai", text: "Network error. Try again." },
       ]);
-    } catch {
-      setMessages((m) => [...m, { role: "ai", text: "Network error. Try again." }]);
     }
 
     setLoading(false);
