@@ -10,10 +10,36 @@ import { useAuth } from "../../components/auth/AuthProvider";
 
 export default function TrainPage() {
   const { user } = useAuth();
-  const [scenario] = useState(scenarios[0]);
+  const [scenario, setScenario] = useState(null);
   const [stepId, setStepId] = useState("start");
   const [feedback, setFeedback] = useState("");
   const [score, setScore] = useState(0);
+
+  function startScenario(s) {
+    setScenario(s);
+    setStepId("start");
+    setFeedback("");
+    setScore(0);
+  }
+
+  if (!scenario) {
+    return (
+      <div>
+        <h1>Training</h1>
+        <p>Pick a scenario and practice protecting your rights under pressure.</p>
+
+        {scenarios.map((s) => (
+          <div key={s.id} className="card">
+            <h2>{s.title}</h2>
+            <p>{s.description}</p>
+            <button className="btn" onClick={() => startScenario(s)}>
+              Start
+            </button>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   const step = scenario.steps[stepId];
 
@@ -49,13 +75,16 @@ export default function TrainPage() {
           <button
             className="btn"
             style={{ marginLeft: 8 }}
-            onClick={() => {
-              setStepId("start");
-              setFeedback("");
-              setScore(0);
-            }}
+            onClick={() => startScenario(scenario)}
           >
             Try Again
+          </button>
+          <button
+            className="btn"
+            style={{ marginLeft: 8 }}
+            onClick={() => setScenario(null)}
+          >
+            All Scenarios
           </button>
         </div>
       </div>

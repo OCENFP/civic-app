@@ -58,5 +58,145 @@
         "result": "You gave up key protections."
       }
     }
+  },
+  {
+    "id": "door_knock_branching",
+    "title": "Police at Your Door",
+    "description": "Two officers knock on your front door. They say they want to ask a few questions.",
+    "steps": {
+      "start": {
+        "question": "Officer: 'Mind if we come in and look around?'",
+        "choices": [
+          {
+            "text": "Sure, come in",
+            "correct": false,
+            "next": "let_in",
+            "feedback": "Letting them in is consent \u2014 anything in view can now be used."
+          },
+          {
+            "text": "Do you have a warrant?",
+            "correct": true,
+            "next": "warrant_question",
+            "feedback": "Correct. Without a warrant, you don't have to open the door."
+          }
+        ]
+      },
+      "let_in": {
+        "question": "Inside, an officer starts asking about your roommate.",
+        "choices": [
+          {
+            "text": "Answer everything to seem cooperative",
+            "correct": false,
+            "next": "end_bad",
+            "feedback": "Your statements can be used against you or others."
+          },
+          {
+            "text": "I'd like you to leave now",
+            "correct": true,
+            "next": "end_ok",
+            "feedback": "You can revoke consent at any time."
+          }
+        ]
+      },
+      "warrant_question": {
+        "question": "Officer: 'We don't need a warrant to talk. Just open up.'",
+        "choices": [
+          {
+            "text": "Open the door anyway",
+            "correct": false,
+            "next": "end_bad",
+            "feedback": "Opening the door can become implied consent to enter."
+          },
+          {
+            "text": "Speak through the door: 'I don't consent to entry.'",
+            "correct": true,
+            "next": "end_good",
+            "feedback": "Correct. You may speak through the door and refuse entry without a warrant."
+          }
+        ]
+      },
+      "end_good": {
+        "end": true,
+        "result": "You protected your home \u2014 no warrant, no entry."
+      },
+      "end_ok": {
+        "end": true,
+        "result": "You recovered by revoking consent, but letting them in exposed you."
+      },
+      "end_bad": {
+        "end": true,
+        "result": "You gave up your strongest protection: the home."
+      }
+    }
+  },
+  {
+    "id": "street_stop_branching",
+    "title": "Stopped on the Street",
+    "description": "An officer approaches you on the sidewalk and starts asking questions.",
+    "steps": {
+      "start": {
+        "question": "Officer: 'Where are you headed? Got any ID on you?'",
+        "choices": [
+          {
+            "text": "Hand over ID and explain your whole day",
+            "correct": false,
+            "next": "talking",
+            "feedback": "In many states you aren't required to show ID unless detained or driving."
+          },
+          {
+            "text": "Am I being detained, or am I free to go?",
+            "correct": true,
+            "next": "detained_question",
+            "feedback": "Correct. This forces the officer to clarify the stop's legal status."
+          }
+        ]
+      },
+      "talking": {
+        "question": "Officer keeps asking questions about a nearby incident.",
+        "choices": [
+          {
+            "text": "Keep explaining yourself",
+            "correct": false,
+            "next": "end_bad",
+            "feedback": "Innocent explanations can still be used against you."
+          },
+          {
+            "text": "I choose to remain silent",
+            "correct": true,
+            "next": "end_ok",
+            "feedback": "You can invoke your right to silence at any point."
+          }
+        ]
+      },
+      "detained_question": {
+        "question": "Officer: 'Just answer the question.'",
+        "choices": [
+          {
+            "text": "Repeat calmly: 'Am I free to go?'",
+            "correct": true,
+            "next": "end_good",
+            "feedback": "Correct. If you're not detained, you may walk away calmly."
+          },
+          {
+            "text": "Walk away without a word, quickly",
+            "correct": false,
+            "next": "end_bad",
+            "feedback": "Sudden flight can create suspicion; clarify first, then leave calmly."
+          }
+        ]
+      },
+      "end_good": {
+        "end": true,
+        "result": "You clarified the stop and protected your rights."
+      },
+      "end_ok": {
+        "end": true,
+        "result": "You stopped the bleeding by going silent, but shared more than needed."
+      },
+      "end_bad": {
+        "end": true,
+        "result": "You volunteered information you never had to give."
+      }
+    }
   }
 ]
