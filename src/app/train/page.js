@@ -6,6 +6,7 @@ import ScenarioCard from "../../components/ScenarioCard";
 import { updateProgress } from "../../engine/trainEngine";
 import { playSound } from "../../engine/sound";
 import { shareResult } from "../../engine/share";
+import { generateShare } from "../../engine/growth/growthEngine";
 import { useAuth } from "../../components/auth/AuthProvider";
 
 export default function TrainPage() {
@@ -67,7 +68,9 @@ export default function TrainPage() {
           <button
             className="btn"
             onClick={() =>
-              shareResult(`I scored ${score} on "${scenario.title}" — ${step.result}`)
+              shareResult(
+                generateShare(`I scored ${score} on "${scenario.title}" — ${step.result}`)
+              )
             }
           >
             Share Result

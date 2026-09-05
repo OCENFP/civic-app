@@ -52,6 +52,12 @@ payments activate once the corresponding keys are set in `.env.local`
   `/api/generate`, `/api/laws?state=texas`, `/api/progress`,
   `/api/stripe`, `/api/voice`
 
+### Supabase setup
+
+Run `supabase/schema.sql` against your project (SQL editor or
+`supabase db push`) — it creates both tables below with row-level
+security (public anonymized leaderboard reads, owner-only writes).
+
 ### Supabase tables used
 
 - `history` (`user_id`, `question`, `answer`) — Q&A history

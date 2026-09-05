@@ -3,14 +3,17 @@
 import { useState } from "react";
 import Loader from "./Loader";
 import { authHeaders } from "../lib/auth";
+import { speak, startListening, useVoiceSupport } from "../engine/voiceEngine";
 
 export default function ChatUI() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [listening, setListening] = useState(false);
+  const voiceReady = useVoiceSupport();
 
   async function send(e) {
-    e.preventDefault();
+    e?.preventDefault();
     const question = input.trim();
     if (!question || loading) return;
 
@@ -41,6 +44,21 @@ export default function ChatUI() {
     setLoading(false);
   }
 
+  function listen() {
+    if (listening) return;
+    setListening(true);
+    const rec = startListening((text) => {
+      setInput(text);
+      setListening(false);
+    });
+    if (!rec) {
+      setListening(false);
+      return;
+    }
+    rec.onend = () => setListening(false);
+    rec.onerror = () => setListening(false);
+  }
+
   return (
     <div>
       {messages.map((m, i) => (
@@ -49,6 +67,9 @@ export default function ChatUI() {
             <strong>{m.role === "user" ? "You" : "AI"}:</strong>
           </p>
           <p style={{ whiteSpace: "pre-wrap" }}>{m.text}</p>
+          {m.role === "ai" && voiceReady.speak && (
+            <button onClick={() => speak(m.text)}>🔊 Listen</button>
+          )}
           {m.sources?.length > 0 && (
             <p style={{ fontSize: 12, color: "#666" }}>
               Sources: {m.sources.join(", ")}
@@ -66,6 +87,11 @@ export default function ChatUI() {
           placeholder="e.g. Can police search my car?"
           style={{ flex: 1 }}
         />
+        {voiceReady.listen && (
+          <button type="button" onClick={listen} disabled={listening}>
+            {listening ? "🎙️…" : "🎙️"}
+          </button>
+        )}
         <button type="submit" className="btn" disabled={loading}>
           Send
         </button>
