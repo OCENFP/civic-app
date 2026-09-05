@@ -19,6 +19,20 @@ jobs:
       - run: npx eslint src --ext .js,.jsx
       - run: npm run build
 
+  e2e:
+    name: Web app (Playwright e2e)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: npx playwright test
+
   frontend-scaffold:
     name: Secondary frontend (build)
     runs-on: ubuntu-latest

@@ -16,6 +16,10 @@ next-env.d.ts
 # Local databases
 *.db
 
+# Playwright
+test-results/
+playwright-report/
+
 # Misc
 .DS_Store
 *.log
