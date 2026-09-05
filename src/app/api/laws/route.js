@@ -8,9 +8,12 @@ export const GET = withErrorHandling(async (req) => {
 
   if (!state) return Response.json(stateLaws);
 
-  const laws = stateLaws[state.toLowerCase()];
+  const key = state.toLowerCase();
 
-  if (!laws) return apiError(`No laws found for state: ${state}`, 404);
+  // own-property check so lookups like "constructor" can't hit the prototype chain
+  if (!Object.prototype.hasOwnProperty.call(stateLaws, key)) {
+    return apiError(`No laws found for state: ${state}`, 404);
+  }
 
-  return Response.json({ state: state.toLowerCase(), laws });
+  return Response.json({ state: key, laws: stateLaws[key] });
 });

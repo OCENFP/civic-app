@@ -1,30 +1,26 @@
 import { trackEvent } from "./analytics";
+import { loadProgress, saveProgress, updateStreak } from "./storage";
 
 export function updateProgress({ correct, user }) {
-  let xp = parseInt(localStorage.getItem("xp") || "0");
-  let streak = parseInt(localStorage.getItem("streak") || "0");
+  const progress = updateStreak(loadProgress());
 
   if (correct) {
-    xp += 10;
-    streak += 1;
-  } else {
-    streak = 0;
+    progress.xp += 10;
   }
 
-  localStorage.setItem("xp", xp);
-  localStorage.setItem("streak", streak);
+  saveProgress(progress);
 
-  trackEvent("progress_update", { xp, streak });
+  trackEvent("progress_update", { xp: progress.xp, streak: progress.streak });
 
   // 🔥 SEND TO DATABASE
   fetch("/api/progress", {
     method: "POST",
     body: JSON.stringify({
       userId: user?.id,
-      xp,
-      streak,
+      xp: progress.xp,
+      streak: progress.streak,
     }),
   });
 
-  return { xp, streak };
+  return progress;
 }

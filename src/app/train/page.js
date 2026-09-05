@@ -1,22 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ProtectedRoute from "../../components/ProtectedRoute";
 import Navbar from "../../components/Navbar";
 import ScenarioCard from "../../components/ScenarioCard";
 import scenarios from "../../data/scenarios.json";
 import { updateProgress } from "../../engine/trainEngine";
+import { getUser } from "../../lib/auth";
 
 export default function TrainPage() {
   const scenario = scenarios[0];
   const [stepId, setStepId] = useState("start");
   const [feedback, setFeedback] = useState("");
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    getUser().then(setUser);
+  }, []);
 
   const step = scenario.steps[stepId];
 
   function handleChoice(choice) {
     setFeedback(choice.feedback);
-    updateProgress({ correct: choice.correct, user: null });
+    updateProgress({ correct: choice.correct, user });
     setStepId(choice.next);
   }
 
