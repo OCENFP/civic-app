@@ -21,6 +21,7 @@ export default function Navbar() {
       <div style={{ display: "flex", gap: "10px", marginTop: "12px", flexWrap: "wrap" }}>
         <Link href="/">Ask</Link>
         <Link href="/learn">Learn</Link>
+        <Link href="/laws">State Laws</Link>
         <Link href="/train">Train</Link>
         <Link href="/chat">Chat</Link>
         <Link href="/leaderboard">Leaderboard</Link>
