@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import ProtectedRoute from "../../components/ProtectedRoute";
+import ProtectedRoute from "../../components/auth/ProtectedRoute";
 import Navbar from "../../components/Navbar";
 import ScenarioCard from "../../components/ScenarioCard";
 import scenarios from "../../data/scenarios.json";
