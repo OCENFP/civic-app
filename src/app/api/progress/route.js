@@ -1,82 +1,56 @@
-import OpenAI from "openai";
 import { supabase } from "../../../lib/supabase";
-import data from "../../../data/constitution.json";
+import { handleError } from "../../../lib/errorHandler";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+export async function GET(req) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const userId = searchParams.get("userId");
 
-// Simple keyword search (we will upgrade to embeddings next)
-function simpleSearch(query) {
-  return data.filter((item) =>
-    item.tags.some((tag) =>
-      query.toLowerCase().includes(tag.toLowerCase())
-    )
-  );
+    if (!userId) {
+      return Response.json({ error: "userId required" }, { status: 400 });
+    }
+
+    const { data, error } = await supabase
+      .from("progress")
+      .select("*")
+      .eq("user_id", userId)
+      .single();
+
+    if (error && error.code !== "PGRST116") {
+      return Response.json({ error: error.message }, { status: 500 });
+    }
+
+    return Response.json({ progress: data || { xp: 0, streak: 0 } });
+  } catch (err) {
+    return handleError(err);
+  }
 }
 
 export async function POST(req) {
   try {
-    const { question, userId } = await req.json();
+    const { userId, xp, streak } = await req.json();
 
-    if (!question) {
-      return Response.json({ error: "No question provided" }, { status: 400 });
+    // Anonymous local progress is fine — nothing to persist server-side
+    if (!userId) {
+      return Response.json({ saved: false });
     }
 
-    // Step 1: Find relevant legal context
-    const relevant = simpleSearch(question);
-
-    const context = relevant.length
-      ? relevant.map((r) => `${r.title}: ${r.text}`).join("\n\n")
-      : "No direct match found in legal database.";
-
-    // Step 2: AI Response
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: `
-You are a civic legal assistant.
-
-ONLY use the legal context below if relevant.
-
-${context}
-
-Respond in this structure:
-
-1. Simple Explanation
-2. Real-Life Example
-3. What You Should Do
-4. What You Can Say (short phrase)
-
-If unsure, say "I don't know".
-          `,
-        },
-        {
-          role: "user",
-          content: question,
-        },
-      ],
-    });
-
-    const answer = completion.choices[0].message.content;
-
-    // Step 3: Save to Supabase (ONLY if userId exists)
-    if (userId) {
-      await supabase.from("history").insert({
+    const { error } = await supabase.from("progress").upsert(
+      {
         user_id: userId,
-        question,
-        answer,
-      });
+        xp: xp ?? 0,
+        streak: streak ?? 0,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" }
+    );
+
+    if (error) {
+      return Response.json({ error: error.message }, { status: 500 });
     }
 
-    return Response.json({
-      answer,
-      sources: relevant.map((r) => r.title),
-    });
+    return Response.json({ saved: true });
   } catch (err) {
-    console.error(err);
-    return Response.json({ error: err.message }, { status: 500 });
+    return handleError(err);
   }
 }

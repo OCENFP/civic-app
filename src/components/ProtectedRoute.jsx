@@ -13,7 +13,7 @@ export default function ProtectedRoute({ children }) {
       if (!u) router.push("/");
       else setUser(u);
     });
-  }, []);
+  }, [router]);
 
   if (!user) return <p>Loading...</p>;
 

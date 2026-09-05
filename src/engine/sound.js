@@ -4,7 +4,7 @@ export function playSound(type) {
   if (type === "correct") {
     audio = new Audio("/sounds/correct.mp3");
   } else {
-    audio = new Audio("/sounds/wrong.mp3");
+    audio = new Audio("/sounds/incorrect.mp3");
   }
 
   audio.play();
