@@ -13,6 +13,9 @@ __pycache__/
 out/
 next-env.d.ts
 
+# Local databases
+*.db
+
 # Misc
 .DS_Store
 *.log

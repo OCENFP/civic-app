@@ -33,9 +33,11 @@ app.add_middleware(
 # -----------------------
 # SAFE JSON LOADER
 # -----------------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 def load_json_file(path):
     try:
-        with open(path, "r") as f:
+        with open(os.path.join(BASE_DIR, path), "r") as f:
             return json.load(f)
     except Exception as e:
         print(f"[ERROR] Failed loading {path}: {e}")
