@@ -54,9 +54,12 @@ payments activate once the corresponding keys are set in `.env.local`
 
 ### Supabase tables used
 
-- `users` (`id`, `email`, `xp`) — leaderboard
 - `history` (`user_id`, `question`, `answer`) — Q&A history
-- `progress` (`user_id` unique, `xp`, `streak`, `updated_at`) — training progress
+- `progress` (`user_id` unique, `xp`, `streak`, `updated_at`) — training progress; also drives the leaderboard (anonymized)
+
+Authenticated API calls (`/api/progress`, history saves in `/api/ask`) derive
+identity from the Supabase access token in the `Authorization` header — never
+from client-supplied IDs.
 
 ## Backend (FastAPI)
 

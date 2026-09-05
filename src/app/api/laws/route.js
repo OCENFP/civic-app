@@ -10,7 +10,8 @@ export async function GET(req) {
       return Response.json({ states: Object.keys(laws) });
     }
 
-    const law = laws[state.toLowerCase()];
+    const key = state.toLowerCase();
+    const law = Object.hasOwn(laws, key) ? laws[key] : null;
 
     if (!law) {
       return Response.json({ error: `No data for state: ${state}` }, { status: 404 });

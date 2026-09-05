@@ -5,14 +5,15 @@ import os
 import json
 from dotenv import load_dotenv
 
-from services.google_civic_api import get_representatives
-from services.bills_api import search_bills
-from services.voting_api import search_votes
-
 # -----------------------
 # ENV SETUP
 # -----------------------
+# Load .env BEFORE importing services: they read env vars at import time.
 load_dotenv()
+
+from services.google_civic_api import get_representatives
+from services.bills_api import search_bills
+from services.voting_api import search_votes
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None

@@ -1,13 +1,10 @@
 import courses from "../../data/courses.json";
-import Navbar from "../../components/Navbar";
 
 export default function Learn() {
   const course = courses[0];
 
   return (
     <div>
-      <Navbar />
-
       <h1>{course.title}</h1>
       <p>{course.description}</p>
 

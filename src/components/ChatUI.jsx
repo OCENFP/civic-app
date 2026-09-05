@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useAuth } from "./auth/AuthProvider";
 import Loader from "./Loader";
+import { authHeaders } from "../lib/auth";
 
 export default function ChatUI() {
-  const { user } = useAuth();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,7 +21,8 @@ export default function ChatUI() {
     try {
       const res = await fetch("/api/ask", {
         method: "POST",
-        body: JSON.stringify({ question, userId: user?.id }),
+        headers: await authHeaders(),
+        body: JSON.stringify({ question }),
       });
       const data = await res.json();
 

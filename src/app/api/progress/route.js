@@ -1,19 +1,19 @@
 import { supabase } from "../../../lib/supabase";
+import { getUserFromRequest } from "../../../lib/serverAuth";
 import { handleError } from "../../../lib/errorHandler";
 
 export async function GET(req) {
   try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
+    const user = await getUserFromRequest(req);
 
-    if (!userId) {
-      return Response.json({ error: "userId required" }, { status: 400 });
+    if (!user) {
+      return Response.json({ error: "Authentication required" }, { status: 401 });
     }
 
     const { data, error } = await supabase
       .from("progress")
       .select("*")
-      .eq("user_id", userId)
+      .eq("user_id", user.id)
       .single();
 
     if (error && error.code !== "PGRST116") {
@@ -28,18 +28,21 @@ export async function GET(req) {
 
 export async function POST(req) {
   try {
-    const { userId, xp, streak } = await req.json();
+    const { xp, streak } = await req.json();
+
+    // Identity comes from the verified token, never from the request body.
+    const user = await getUserFromRequest(req);
 
     // Anonymous local progress is fine — nothing to persist server-side
-    if (!userId) {
+    if (!user) {
       return Response.json({ saved: false });
     }
 
     const { error } = await supabase.from("progress").upsert(
       {
-        user_id: userId,
-        xp: xp ?? 0,
-        streak: streak ?? 0,
+        user_id: user.id,
+        xp: Number.isFinite(xp) ? xp : 0,
+        streak: Number.isFinite(streak) ? streak : 0,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "user_id" }
