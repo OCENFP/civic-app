@@ -24,10 +24,7 @@ export default function Navbar() {
             <Link href="/profile">Profile</Link>
           </>
         ) : (
-          <>
-            <Link href="/login">Log In</Link>
-            <Link href="/signup">Sign Up</Link>
-          </>
+          <Link href="/login">Log In</Link>
         )}
       </div>
     </nav>
