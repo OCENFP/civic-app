@@ -102,6 +102,10 @@ npm install
 EXPO_PUBLIC_API_URL=http://<your-machine-ip>:3000 npx expo start
 ```
 
+The Train tab runs the same branching scenarios as the web app from a
+bundled copy. After editing `src/data/scenarios.json`, run
+`python3 scripts/sync_mobile_data.py` (CI fails if the copies drift).
+
 The home tab asks the web app's `/api/ask` endpoint. `EXPO_PUBLIC_API_URL`
 must point at a reachable instance of the web app (a device can't reach
 `localhost`); it defaults to `http://localhost:3000` for web preview.

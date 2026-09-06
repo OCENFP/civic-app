@@ -94,10 +94,29 @@ def validate_misc():
         load(path)
 
 
+def validate_mobile_sync(
+    source="src/data/scenarios.json",
+    copy="frontend/mobile/constants/scenarios.json",
+):
+    """The mobile Train tab bundles its own copy of the scenarios (Expo
+    cannot import across the repo root). Drift means the two apps teach
+    different content, so treat it as an error with a one-command fix."""
+    a, b = load(source), load(copy)
+    if a is None or b is None:
+        return
+
+    if a != b:
+        err(
+            f"{copy} is out of sync with {source} — "
+            f"run: python3 scripts/sync_mobile_data.py"
+        )
+
+
 def main():
     validate_scenarios()
     validate_courses()
     validate_misc()
+    validate_mobile_sync()
 
     if ERRORS:
         print(f"DATA VALIDATION FAILED ({len(ERRORS)} problem(s)):")

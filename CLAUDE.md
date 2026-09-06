@@ -36,3 +36,8 @@ AI grounded in constitutional data.
   There is no `users` table.
 - `backend/main.py` calls `load_dotenv()` BEFORE importing services (they
   read env at import time) — keep that ordering.
+- `src/data/scenarios.json` is the source of truth; the Expo app bundles a
+  copy at `frontend/mobile/constants/scenarios.json` (its bundler can't
+  reach the repo root). After editing scenarios run
+  `python3 scripts/sync_mobile_data.py` — `scripts/validate_data.py` fails
+  CI on drift.
