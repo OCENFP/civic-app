@@ -13,16 +13,20 @@ export default function Onboarding() {
     "Build confidence under pressure",
   ];
 
+  const isLast = step === steps.length - 1;
+
   return (
     <div>
       <h1>Welcome</h1>
       <p>{steps[step]}</p>
 
-      <button onClick={() => setStep(step + 1)}>
-        Next
-      </button>
+      {!isLast && (
+        <button onClick={() => setStep(step + 1)}>
+          Next
+        </button>
+      )}
 
-      {step >= steps.length && (
+      {isLast && (
         <button onClick={() => router.push("/train")}>
           Start Training
         </button>

@@ -1,82 +1,59 @@
-import OpenAI from "openai";
 import { supabase } from "../../../lib/supabase";
-import data from "../../../data/constitution.json";
+import { getUserFromRequest } from "../../../lib/serverAuth";
+import { handleError } from "../../../lib/errorHandler";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+export async function GET(req) {
+  try {
+    const user = await getUserFromRequest(req);
 
-// Simple keyword search (we will upgrade to embeddings next)
-function simpleSearch(query) {
-  return data.filter((item) =>
-    item.tags.some((tag) =>
-      query.toLowerCase().includes(tag.toLowerCase())
-    )
-  );
+    if (!user) {
+      return Response.json({ error: "Authentication required" }, { status: 401 });
+    }
+
+    const { data, error } = await supabase
+      .from("progress")
+      .select("*")
+      .eq("user_id", user.id)
+      .single();
+
+    if (error && error.code !== "PGRST116") {
+      return Response.json({ error: error.message }, { status: 500 });
+    }
+
+    return Response.json({ progress: data || { xp: 0, streak: 0 } });
+  } catch (err) {
+    return handleError(err);
+  }
 }
 
 export async function POST(req) {
   try {
-    const { question, userId } = await req.json();
+    const { xp, streak } = await req.json();
 
-    if (!question) {
-      return Response.json({ error: "No question provided" }, { status: 400 });
+    // Identity comes from the verified token, never from the request body.
+    const user = await getUserFromRequest(req);
+
+    // Anonymous local progress is fine — nothing to persist server-side
+    if (!user) {
+      return Response.json({ saved: false });
     }
 
-    // Step 1: Find relevant legal context
-    const relevant = simpleSearch(question);
+    const { error } = await supabase.from("progress").upsert(
+      {
+        user_id: user.id,
+        xp: Number.isFinite(xp) ? xp : 0,
+        streak: Number.isFinite(streak) ? streak : 0,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" }
+    );
 
-    const context = relevant.length
-      ? relevant.map((r) => `${r.title}: ${r.text}`).join("\n\n")
-      : "No direct match found in legal database.";
-
-    // Step 2: AI Response
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: `
-You are a civic legal assistant.
-
-ONLY use the legal context below if relevant.
-
-${context}
-
-Respond in this structure:
-
-1. Simple Explanation
-2. Real-Life Example
-3. What You Should Do
-4. What You Can Say (short phrase)
-
-If unsure, say "I don't know".
-          `,
-        },
-        {
-          role: "user",
-          content: question,
-        },
-      ],
-    });
-
-    const answer = completion.choices[0].message.content;
-
-    // Step 3: Save to Supabase (ONLY if userId exists)
-    if (userId) {
-      await supabase.from("history").insert({
-        user_id: userId,
-        question,
-        answer,
-      });
+    if (error) {
+      return Response.json({ error: error.message }, { status: 500 });
     }
 
-    return Response.json({
-      answer,
-      sources: relevant.map((r) => r.title),
-    });
+    return Response.json({ saved: true });
   } catch (err) {
-    console.error(err);
-    return Response.json({ error: err.message }, { status: 500 });
+    return handleError(err);
   }
 }

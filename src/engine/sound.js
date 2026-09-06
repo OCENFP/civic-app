@@ -1,11 +1,10 @@
 export function playSound(type) {
-  let audio;
-
-  if (type === "correct") {
-    audio = new Audio("/sounds/correct.mp3");
-  } else {
-    audio = new Audio("/sounds/wrong.mp3");
+  try {
+    const audio = new Audio(
+      type === "correct" ? "/sounds/correct.mp3" : "/sounds/incorrect.mp3"
+    );
+    audio.play().catch(() => {});
+  } catch {
+    // Autoplay blocked or Audio unavailable — sound is best-effort
   }
-
-  audio.play();
 }

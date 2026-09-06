@@ -1,12 +1,16 @@
+import scenarios from "../../../data/scenarios.json";
+
+// Rotate through the real training scenarios so the dashboard's
+// "Start Training" always has a matching exercise.
 export async function GET() {
-  const challenges = [
-    "Refuse a search scenario",
-    "Stay silent during questioning",
-    "Identify illegal police action",
-  ];
+  const challenges = scenarios.map((s) => ({
+    scenarioId: s.id,
+    title: s.title,
+    challenge: s.description,
+  }));
 
   const today = new Date().getDate();
-  const challenge = challenges[today % challenges.length];
+  const pick = challenges[today % challenges.length];
 
-  return Response.json({ challenge });
+  return Response.json(pick);
 }

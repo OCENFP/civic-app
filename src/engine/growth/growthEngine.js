@@ -1,3 +1,5 @@
 export function generateShare(text) {
-  return `🚨 Know your rights:\n${text}\n\nTry it: yourapp.com`;
+  const origin =
+    typeof window !== "undefined" ? window.location.origin : "";
+  return `🚨 Know your rights:\n${text}${origin ? `\n\nTry it: ${origin}` : ""}`;
 }
