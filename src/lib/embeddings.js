@@ -1,8 +1,8 @@
-import { getOpenAI } from "./openai";
+import { openai } from "./openai";
 
 // Convert text → vector
 export async function getEmbedding(text) {
-  const res = await getOpenAI().embeddings.create({
+  const res = await openai.embeddings.create({
     model: "text-embedding-3-small",
     input: text,
   });

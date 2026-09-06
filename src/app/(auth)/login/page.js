@@ -11,11 +11,9 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  async function login(e) {
+  async function handleLogin(e) {
     e.preventDefault();
-    setLoading(true);
     setError("");
 
     const { error } = await supabase.auth.signInWithPassword({
@@ -23,22 +21,24 @@ export default function Login() {
       password,
     });
 
-    setLoading(false);
-
-    if (error) setError(error.message);
-    else router.push("/dashboard");
+    if (error) {
+      setError(error.message);
+    } else {
+      router.push("/dashboard");
+    }
   }
 
   return (
     <div>
       <h1>Log In</h1>
 
-      <form onSubmit={login}>
+      <form onSubmit={handleLogin}>
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"
+          aria-label="Email"
           required
         />
         <input
@@ -46,12 +46,10 @@ export default function Login() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
+          aria-label="Password"
           required
         />
-
-        <button className="btn" type="submit" disabled={loading}>
-          {loading ? "Logging in..." : "Log In"}
-        </button>
+        <button type="submit" className="btn">Log In</button>
       </form>
 
       <button onClick={signInWithGoogle}>Continue with Google</button>

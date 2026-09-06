@@ -1,24 +1,22 @@
-import { askAI } from "../../../lib/openai";
-import { supabase } from "../../../lib/supabase";
-import { apiError, withErrorHandling } from "../../../lib/errorHandler";
+import { openai } from "../../../lib/openai";
+import { handleError } from "../../../lib/errorHandler";
+import { rateLimit } from "../../../lib/rateLimit";
 
-// POST { topic } → { scenario }  (admin scenario generator)
-// Spends OpenAI credits, so a valid Supabase access token is required
-// (Authorization: Bearer <token>).
-export const POST = withErrorHandling(async (req) => {
-  const token = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
-  if (!token) return apiError("Authentication required", 401);
+export async function POST(req) {
+  try {
+    const limited = rateLimit(req, { limit: 5, windowMs: 60_000 });
+    if (limited) return limited;
 
-  const { data, error } = await supabase.auth.getUser(token);
-  if (error || !data?.user) return apiError("Invalid or expired token", 401);
+    const { topic } = await req.json();
 
-  const { topic } = await req.json();
+    if (typeof topic !== "string" || !topic.trim()) {
+      return Response.json({ error: "No topic provided" }, { status: 400 });
+    }
+    if (topic.length > 500) {
+      return Response.json({ error: "Topic too long (max 500 chars)" }, { status: 400 });
+    }
 
-  if (typeof topic !== "string" || !topic.trim()) {
-    return apiError("topic must be a non-empty string", 400);
-  }
-
-  const prompt = `
+    const prompt = `
 Create a branching training scenario about: ${topic}
 Include:
 - situation
@@ -27,7 +25,13 @@ Include:
 - consequences
 `;
 
-  const scenario = await askAI(prompt);
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+    });
 
-  return Response.json({ scenario });
-});
+    return Response.json({ scenario: completion.choices[0].message.content });
+  } catch (err) {
+    return handleError(err);
+  }
+}

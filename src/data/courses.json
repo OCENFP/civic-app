@@ -38,5 +38,94 @@
         ]
       }
     ]
+  },
+  {
+    "id": "speech_and_assembly",
+    "title": "Speech & Assembly",
+    "description": "Your First Amendment rights in public \u2014 speaking, recording, and protesting",
+    "modules": [
+      {
+        "id": "public_expression",
+        "title": "Expression in Public",
+        "lessons": [
+          {
+            "title": "Peaceful Assembly",
+            "explanation": "You may gather peacefully in traditional public forums like sidewalks and parks",
+            "when_applies": "Protests, rallies, and demonstrations in public spaces",
+            "example": "Joining a march on a public sidewalk",
+            "risk": "Blocking traffic or entrances can turn lawful assembly into a citable offense",
+            "action": "Stay on public property and keep pathways clear",
+            "script": "We are assembling peacefully on public property."
+          },
+          {
+            "title": "Recording in Public",
+            "explanation": "You generally may record police performing their duties in public",
+            "when_applies": "Witnessing or being part of a public police encounter",
+            "example": "Filming an arrest from a safe distance",
+            "risk": "Interfering with the officer's work can lead to arrest even while recording lawfully",
+            "action": "Record from a distance and never physically interfere",
+            "script": "I am recording from a lawful distance and not interfering."
+          },
+          {
+            "title": "Dispersal Orders",
+            "explanation": "Police may order a crowd to disperse when an assembly is declared unlawful",
+            "when_applies": "A protest is declared an unlawful assembly",
+            "example": "Officers announce everyone must leave the area",
+            "risk": "Remaining after a lawful dispersal order can mean arrest",
+            "action": "Note the order, leave calmly, and document what you saw",
+            "script": "I am complying and leaving the area now."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "if_arrested",
+    "title": "If You Are Arrested",
+    "description": "What to do and say from the moment of arrest through booking",
+    "modules": [
+      {
+        "id": "arrest_basics",
+        "title": "During and After Arrest",
+        "lessons": [
+          {
+            "title": "Miranda Rights",
+            "explanation": "Police must inform you of your rights before custodial interrogation",
+            "when_applies": "You are in custody and being questioned",
+            "example": "Officers begin asking questions after handcuffing you",
+            "risk": "Anything you say can be used against you",
+            "action": "Invoke your rights out loud \u2014 silence alone is not enough",
+            "script": "I am invoking my right to remain silent. I want a lawyer."
+          },
+          {
+            "title": "Booking Questions",
+            "explanation": "Basic identity questions at booking are routine; questions about the case are not",
+            "when_applies": "Being processed at the station",
+            "example": "You are asked your name and address, then about the incident",
+            "risk": "Case questions disguised as paperwork",
+            "action": "Answer identity questions only; decline everything about the case",
+            "script": "I will answer booking questions, but nothing else without my lawyer."
+          },
+          {
+            "title": "Jail Calls Are Recorded",
+            "explanation": "Calls from custody are typically recorded, except properly arranged attorney calls",
+            "when_applies": "Any phone call from jail",
+            "example": "Calling family after booking",
+            "risk": "Statements on recorded lines become evidence",
+            "action": "Never discuss the case on a jail phone",
+            "script": "I can't talk about the case on this line."
+          },
+          {
+            "title": "Asking for a Lawyer",
+            "explanation": "Once you clearly ask for a lawyer, questioning must stop",
+            "when_applies": "Any point during custody or interrogation",
+            "example": "An interview continues after your request",
+            "risk": "Ambiguous requests ('maybe I need a lawyer?') may not count",
+            "action": "Ask clearly and repeat it if questioning continues",
+            "script": "I want a lawyer. I will not answer questions."
+          }
+        ]
+      }
+    ]
   }
 ]

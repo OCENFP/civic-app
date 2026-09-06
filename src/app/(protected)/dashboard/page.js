@@ -2,57 +2,59 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Navbar from "../../../components/Navbar";
-import ProgressBar from "../../../components/ProgressBar";
-import Card from "../../../components/ui/Card";
-import { loadProgress, calculateLevel } from "../../../engine/storage";
+import { useAuth } from "../../../components/auth/AuthProvider";
+import { calculateLevel } from "../../../engine/storage";
+import { useProgress } from "../../../engine/useProgress";
 
 export default function Dashboard() {
-  const [progress, setProgress] = useState({ xp: 0, level: 1, streak: 0 });
-  const [challenge, setChallenge] = useState("");
+  const { user } = useAuth();
+  const progress = useProgress();
+  const [daily, setDaily] = useState(null);
 
   useEffect(() => {
-    Promise.resolve().then(() => {
-      const p = loadProgress();
-      setProgress({ ...p, level: calculateLevel(p.xp) });
-    });
-
     fetch("/api/daily")
-      .then((res) => res.json())
-      .then((data) => setChallenge(data.challenge))
-      .catch(() => setChallenge(""));
+      .then((r) => r.json())
+      .then((d) => setDaily(d))
+      .catch(() => {});
   }, []);
 
   return (
     <div>
-      <Navbar />
-
       <h1>Dashboard</h1>
+      <p>Welcome back{user?.email ? `, ${user.email}` : ""}.</p>
 
-      <Card>
-        <h2>Level {progress.level}</h2>
-        <p>{progress.xp} XP — {progress.streak} day streak</p>
-        <ProgressBar xp={progress.xp} />
-      </Card>
+      <div className="card">
+        <h2>Today&apos;s Challenge</h2>
+        <p>
+          {daily ? (
+            <>
+              <strong>{daily.title}</strong> — {daily.challenge}
+            </>
+          ) : (
+            "Loading..."
+          )}
+        </p>
+        <Link
+          href={daily ? `/train?scenario=${daily.scenarioId}` : "/train"}
+          className="btn"
+        >
+          Start Training
+        </Link>
+      </div>
 
-      {challenge && (
-        <Card>
-          <h2>Daily Challenge</h2>
-          <p>{challenge}</p>
-          <Link href="/train">Start Training →</Link>
-        </Card>
-      )}
+      <div className="card">
+        <h2>Your Progress</h2>
+        <p>XP: {progress.xp}</p>
+        <p>Level: {calculateLevel(progress.xp)}</p>
+        <p>Streak: {progress.streak} 🔥</p>
+      </div>
 
-      <Card>
+      <div className="card">
         <h2>Quick Links</h2>
-        <div style={{ display: "flex", gap: "10px" }}>
-          <Link href="/learn">Learn</Link>
-          <Link href="/train">Train</Link>
-          <Link href="/chat">Chat</Link>
-          <Link href="/leaderboard">Leaderboard</Link>
-          <Link href="/profile">Profile</Link>
-        </div>
-      </Card>
+        <p><Link href="/learn">📚 Learn your rights</Link></p>
+        <p><Link href="/chat">💬 Ask the AI</Link></p>
+        <p><Link href="/leaderboard">🏆 Leaderboard</Link></p>
+      </div>
     </div>
   );
 }

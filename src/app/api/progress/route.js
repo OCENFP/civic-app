@@ -1,33 +1,59 @@
 import { supabase } from "../../../lib/supabase";
-import { apiError, withErrorHandling } from "../../../lib/errorHandler";
+import { getUserFromRequest } from "../../../lib/serverAuth";
+import { handleError } from "../../../lib/errorHandler";
 
-// Progress + analytics sink for the training flow.
-// POST { userId, xp, streak } → persist training progress (engine/trainEngine.js)
-// POST { name, data }         → acknowledge an analytics event (engine/analytics.js)
-export const POST = withErrorHandling(async (req) => {
-  const body = await req.json();
+export async function GET(req) {
+  try {
+    const user = await getUserFromRequest(req);
 
-  if (typeof body.name === "string") {
-    console.log("EVENT:", body.name, body.data ?? {});
-    return Response.json({ ok: true });
+    if (!user) {
+      return Response.json({ error: "Authentication required" }, { status: 401 });
+    }
+
+    const { data, error } = await supabase
+      .from("progress")
+      .select("*")
+      .eq("user_id", user.id)
+      .single();
+
+    if (error && error.code !== "PGRST116") {
+      return Response.json({ error: error.message }, { status: 500 });
+    }
+
+    return Response.json({ progress: data || { xp: 0, streak: 0 } });
+  } catch (err) {
+    return handleError(err);
   }
+}
 
-  const { userId, xp, streak } = body;
+export async function POST(req) {
+  try {
+    const { xp, streak } = await req.json();
 
-  if (typeof xp !== "number" || typeof streak !== "number") {
-    return apiError("xp and streak must be numbers", 400);
+    // Identity comes from the verified token, never from the request body.
+    const user = await getUserFromRequest(req);
+
+    // Anonymous local progress is fine — nothing to persist server-side
+    if (!user) {
+      return Response.json({ saved: false });
+    }
+
+    const { error } = await supabase.from("progress").upsert(
+      {
+        user_id: user.id,
+        xp: Number.isFinite(xp) ? xp : 0,
+        streak: Number.isFinite(streak) ? streak : 0,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" }
+    );
+
+    if (error) {
+      return Response.json({ error: error.message }, { status: 500 });
+    }
+
+    return Response.json({ saved: true });
+  } catch (err) {
+    return handleError(err);
   }
-
-  if (!userId) {
-    // Anonymous training still works locally; nothing to persist server-side.
-    return Response.json({ ok: true, persisted: false });
-  }
-
-  const { error } = await supabase
-    .from("users")
-    .upsert({ id: userId, xp, streak }, { onConflict: "id" });
-
-  if (error) return apiError(error.message, 500);
-
-  return Response.json({ ok: true, persisted: true });
-});
+}

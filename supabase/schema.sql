@@ -1,68 +1,56 @@
--- Supabase schema for Know Your Rights AI
--- Run in the Supabase SQL editor (or via the CLI) to create the tables the app
--- reads and writes. Auth users come from Supabase Auth (auth.users).
+-- civic-app Supabase schema
+-- Apply to the project this app's NEXT_PUBLIC_SUPABASE_URL points at
+-- (SQL editor or `supabase db push`). Additive and idempotent.
 
--- ---------------------------------------------------------------------------
--- users: public profile + gamification state (read by the leaderboard)
--- ---------------------------------------------------------------------------
-create table if not exists public.users (
-  id      uuid primary key references auth.users (id) on delete cascade,
-  email   text,
-  xp      integer not null default 0,
-  streak  integer not null default 0,
+-- Training progress: one row per user; drives the dashboard, profile,
+-- and the anonymized public leaderboard.
+create table if not exists public.progress (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  xp integer not null default 0,
+  streak integer not null default 0,
   updated_at timestamptz not null default now()
 );
 
-alter table public.users enable row level security;
+alter table public.progress enable row level security;
 
--- Anyone (even anonymous) may read the leaderboard.
-drop policy if exists "users are readable by everyone" on public.users;
-create policy "users are readable by everyone"
-  on public.users for select
+-- Leaderboard reads are public but expose only user_id/xp/streak
+-- (the app renders a truncated id, never an email).
+drop policy if exists "progress_public_read" on public.progress;
+create policy "progress_public_read"
+  on public.progress for select
   using (true);
 
--- A user may create/update only their own row.
-drop policy if exists "users manage own row" on public.users;
-create policy "users manage own row"
-  on public.users for all
-  using (auth.uid() = id)
-  with check (auth.uid() = id);
+drop policy if exists "progress_owner_write" on public.progress;
+create policy "progress_owner_write"
+  on public.progress for insert
+  with check (auth.uid() = user_id);
 
--- Populate public.users automatically when someone signs up.
-create or replace function public.handle_new_user()
-returns trigger
-language plpgsql
-security definer
-set search_path = public
-as $$
-begin
-  insert into public.users (id, email)
-  values (new.id, new.email)
-  on conflict (id) do nothing;
-  return new;
-end;
-$$;
+drop policy if exists "progress_owner_update" on public.progress;
+create policy "progress_owner_update"
+  on public.progress for update
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
 
-drop trigger if exists on_auth_user_created on auth.users;
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute function public.handle_new_user();
-
--- ---------------------------------------------------------------------------
--- history: saved AI Q&A per user (written by /api/ask)
--- ---------------------------------------------------------------------------
+-- Q&A history: private to its owner.
 create table if not exists public.history (
-  id         bigint generated always as identity primary key,
-  user_id    uuid references auth.users (id) on delete cascade,
-  question   text not null,
-  answer     text not null,
+  id bigint generated always as identity primary key,
+  user_id uuid not null references auth.users (id) on delete cascade,
+  question text not null,
+  answer text not null,
   created_at timestamptz not null default now()
 );
 
+create index if not exists history_user_created_idx
+  on public.history (user_id, created_at desc);
+
 alter table public.history enable row level security;
 
-drop policy if exists "history is private to its owner" on public.history;
-create policy "history is private to its owner"
-  on public.history for all
-  using (auth.uid() = user_id)
+drop policy if exists "history_owner_read" on public.history;
+create policy "history_owner_read"
+  on public.history for select
+  using (auth.uid() = user_id);
+
+drop policy if exists "history_owner_insert" on public.history;
+create policy "history_owner_insert"
+  on public.history for insert
   with check (auth.uid() = user_id);

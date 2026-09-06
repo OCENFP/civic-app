@@ -1,26 +1,28 @@
 import courses from "../../data/courses.json";
-import Navbar from "../../components/Navbar";
 import LessonCard from "../../components/LessonCard";
+import StateLawCard from "../../components/StateLawCard";
 
 export default function Learn() {
-  const course = courses[0];
-
   return (
     <div>
-      <Navbar />
+      {courses.map((course, ci) => (
+        <div key={course.id ?? ci}>
+          <h1>{course.title}</h1>
+          <p>{course.description}</p>
 
-      <h1>{course.title}</h1>
-      <p>{course.description}</p>
+          {course.modules.map((module) => (
+            <div key={module.id}>
+              <h2>{module.title}</h2>
 
-      {course.modules.map((module) => (
-        <div key={module.id}>
-          <h2>{module.title}</h2>
-
-          {module.lessons.map((lesson, i) => (
-            <LessonCard key={i} lesson={lesson} />
+              {module.lessons.map((lesson, i) => (
+                <LessonCard key={i} lesson={lesson} />
+              ))}
+            </div>
           ))}
         </div>
       ))}
+
+      <StateLawCard />
     </div>
   );
 }

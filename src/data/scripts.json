@@ -1,0 +1,26 @@
+{
+  "lawyer": {
+    "keywords": ["lawyer", "attorney", "legal help", "public defender"],
+    "explanation": "A lawyer protects you if you are accused of a crime",
+    "rights": "You have the right to a lawyer during questioning",
+    "action": "Ask for a lawyer before answering questions",
+    "script": "I want a lawyer",
+    "law": "6th Amendment"
+  },
+  "search": {
+    "keywords": ["search", "search my car", "search me", "look in my car"],
+    "explanation": "Police need a legal reason or your permission to search",
+    "rights": "You can refuse consent to searches",
+    "action": "Clearly say you do not consent",
+    "script": "I do not consent to searches",
+    "law": "4th Amendment"
+  },
+  "silent": {
+    "keywords": ["silent", "remain silent", "not answer", "talk to police"],
+    "explanation": "You do not have to answer police questions",
+    "rights": "You have the right to remain silent",
+    "action": "Politely refuse to answer questions",
+    "script": "I choose to remain silent",
+    "law": "5th Amendment"
+  }
+}

@@ -1,18 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useAuth } from "./auth/AuthProvider";
-import { logout } from "../lib/auth";
 
 export default function Navbar() {
-  const router = useRouter();
-  const { user, loading } = useAuth();
-
-  async function handleLogout() {
-    await logout();
-    router.push("/");
-  }
+  const { user } = useAuth();
 
   return (
     <nav>
@@ -23,23 +15,18 @@ export default function Navbar() {
         <Link href="/learn">Learn</Link>
         <Link href="/laws">State Laws</Link>
         <Link href="/train">Train</Link>
-        <Link href="/chat">Chat</Link>
+        <Link href="/civic">Civic Data</Link>
         <Link href="/leaderboard">Leaderboard</Link>
-
-        {!loading && user && (
+        {user ? (
           <>
             <Link href="/dashboard">Dashboard</Link>
+            <Link href="/chat">Chat</Link>
             <Link href="/profile">Profile</Link>
-            <button className="linklike" onClick={handleLogout}>
-              Log out
-            </button>
           </>
-        )}
-
-        {!loading && !user && (
+        ) : (
           <>
-            <Link href="/login">Log in</Link>
-            <Link href="/signup">Sign up</Link>
+            <Link href="/login">Log In</Link>
+            <Link href="/signup">Sign Up</Link>
           </>
         )}
       </div>

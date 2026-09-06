@@ -2,66 +2,87 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Navbar from "../../../components/Navbar";
-import Card from "../../../components/ui/Card";
-import { getUser, logout } from "../../../lib/auth";
-import { loadProgress, calculateLevel } from "../../../engine/storage";
+import { useAuth } from "../../../components/auth/AuthProvider";
+import { logout } from "../../../lib/auth";
+import { supabase } from "../../../lib/supabase";
+import { calculateLevel } from "../../../engine/storage";
+import { useProgress } from "../../../engine/useProgress";
 
 export default function Profile() {
   const router = useRouter();
-  const [user, setUser] = useState(null);
-  const [progress, setProgress] = useState({ xp: 0, streak: 0 });
+  const { user } = useAuth();
+  const progress = useProgress();
+  const [history, setHistory] = useState([]);
   const [upgrading, setUpgrading] = useState(false);
-  const [error, setError] = useState("");
 
   useEffect(() => {
-    getUser().then(setUser);
-    Promise.resolve().then(() => setProgress(loadProgress()));
-  }, []);
+    if (!user) return;
+    supabase
+      .from("history")
+      .select("question, answer, created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(5)
+      .then(({ data }) => setHistory(data ?? []));
+  }, [user]);
 
   async function handleLogout() {
     await logout();
     router.push("/");
   }
 
-  async function upgrade() {
+  async function goPro() {
     setUpgrading(true);
-    setError("");
     try {
       const res = await fetch("/api/stripe", { method: "POST" });
       const data = await res.json();
-      if (data.url) window.location.href = data.url;
-      else setError(data.error || "Could not start checkout.");
+      if (data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      alert(data.error ?? "Checkout is not available right now.");
     } catch {
-      setError("Could not start checkout.");
+      alert("Checkout is not available right now.");
     }
     setUpgrading(false);
   }
 
   return (
     <div>
-      <Navbar />
       <h1>Profile</h1>
 
-      <Card>
-        <p><strong>Email:</strong> {user?.email || "..."}</p>
-        <p><strong>Level:</strong> {calculateLevel(progress.xp)}</p>
+      <div className="card">
+        <p><strong>Email:</strong> {user?.email}</p>
+        <p><strong>Member since:</strong> {user?.created_at ? new Date(user.created_at).toLocaleDateString() : "—"}</p>
         <p><strong>XP:</strong> {progress.xp}</p>
-        <p><strong>Streak:</strong> {progress.streak} days</p>
-      </Card>
+        <p><strong>Level:</strong> {calculateLevel(progress.xp)}</p>
+        <p><strong>Streak:</strong> {progress.streak}</p>
+      </div>
 
-      <Card>
-        <h2>Pro</h2>
-        <p>Unlock everything for $9.99/month.</p>
-        <button className="btn" onClick={upgrade} disabled={upgrading}>
-          {upgrading ? "Redirecting..." : "Upgrade to Pro"}
+      <div className="card">
+        <h2>Pro Access</h2>
+        <p>Unlimited AI questions and every training scenario — $9.99/month.</p>
+        <button className="btn" onClick={goPro} disabled={upgrading}>
+          {upgrading ? "Opening checkout…" : "Go Pro"}
         </button>
-        {error && <p style={{ color: "red" }}>{error}</p>}
-      </Card>
+      </div>
 
-      <button className="btn" onClick={handleLogout}>
-        Log Out
-      </button>
+      {history.length > 0 && (
+        <div className="card">
+          <h2>Recent Questions</h2>
+          {history.map((h, i) => (
+            <div key={i}>
+              <p><strong>Q:</strong> {h.question}</p>
+              <p style={{ fontSize: 13, opacity: 0.8, whiteSpace: "pre-wrap" }}>
+                {String(h.answer).slice(0, 200)}
+                {String(h.answer).length > 200 ? "…" : ""}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <button onClick={handleLogout} className="btn">Log Out</button>
     </div>
   );
 }

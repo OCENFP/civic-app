@@ -1,8 +1,25 @@
+# Dependencies
 node_modules/
 venv/
-.env
-.env.local
 __pycache__/
 *.pyc
-.DS_Store
+
+# Env
+.env
+.env*.local
+
+# Next.js
 .next/
+out/
+next-env.d.ts
+
+# Local databases
+*.db
+
+# Playwright
+test-results/
+playwright-report/
+
+# Misc
+.DS_Store
+*.log

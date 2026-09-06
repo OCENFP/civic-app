@@ -1,6 +1,6 @@
 "use client";
 
-export default function Modal({ open, onClose, children }) {
+export default function Modal({ open, onClose, title, children }) {
   if (!open) return null;
 
   return (
@@ -19,14 +19,15 @@ export default function Modal({ open, onClose, children }) {
         onClick={(e) => e.stopPropagation()}
         style={{
           background: "white",
-          padding: "24px",
-          borderRadius: "10px",
-          maxWidth: "480px",
+          borderRadius: 10,
+          padding: 24,
+          maxWidth: 480,
           width: "90%",
         }}
       >
+        {title && <h2>{title}</h2>}
         {children}
-        <button className="btn" onClick={onClose} style={{ marginTop: "12px" }}>
+        <button className="btn" onClick={onClose} style={{ marginTop: 12 }}>
           Close
         </button>
       </div>

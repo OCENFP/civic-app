@@ -1,5 +1,6 @@
 import "../styles/globals.css";
 import AuthProvider from "../components/auth/AuthProvider";
+import Navbar from "../components/Navbar";
 
 export const metadata = {
   title: "Know Your Rights AI",
@@ -11,7 +12,10 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <AuthProvider>
-          <div className="container">{children}</div>
+          <div className="container">
+            <Navbar />
+            {children}
+          </div>
         </AuthProvider>
       </body>
     </html>

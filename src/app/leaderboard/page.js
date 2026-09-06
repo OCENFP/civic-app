@@ -1,38 +1,37 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Navbar from "../../components/Navbar";
 import { supabase } from "../../lib/supabase";
 
 export default function Leaderboard() {
-  const [users, setUsers] = useState([]);
+  const [rows, setRows] = useState([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
     supabase
-      .from("users")
-      .select("*")
+      .from("progress")
+      .select("user_id, xp, streak")
       .order("xp", { ascending: false })
       .limit(10)
       .then(({ data, error }) => {
-        if (error) setError(error.message);
-        // data is null on error — never let it reach .map()
-        setUsers(data || []);
+        if (error) {
+          setError("Leaderboard is unavailable right now.");
+        } else {
+          setRows(data ?? []);
+        }
       });
   }, []);
 
   return (
     <div>
-      <Navbar />
       <h1>Leaderboard</h1>
 
-      {error && <p style={{ color: "red" }}>Could not load leaderboard.</p>}
+      {error && <p>{error}</p>}
+      {!error && rows.length === 0 && <p>No trainees on the board yet — be the first!</p>}
 
-      {!error && users.length === 0 && <p>No entries yet.</p>}
-
-      {users.map((u, i) => (
-        <p key={u.id}>
-          {i + 1}. {u.email || "Anonymous"} — {u.xp ?? 0} XP
+      {rows.map((r, i) => (
+        <p key={r.user_id}>
+          {i + 1}. Trainee {String(r.user_id).slice(0, 8)} — {r.xp} XP ({r.streak} 🔥)
         </p>
       ))}
     </div>

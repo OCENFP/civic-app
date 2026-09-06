@@ -1,19 +1,33 @@
-import stateLaws from "../../../data/stateLaws.json";
-import { apiError, withErrorHandling } from "../../../lib/errorHandler";
+import laws from "../../../data/stateLaws.json";
+import california from "../../../data/states/california.json";
+import { handleError } from "../../../lib/errorHandler";
 
-// GET /api/laws          → all states
-// GET /api/laws?state=california → one state
-export const GET = withErrorHandling(async (req) => {
-  const state = new URL(req.url).searchParams.get("state");
+// Per-state detail files enrich the base stateLaws entries.
+const stateDetails = { california };
 
-  if (!state) return Response.json(stateLaws);
+export async function GET(req) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const state = searchParams.get("state");
 
-  const key = state.toLowerCase();
+    if (!state) {
+      return Response.json({ states: Object.keys(laws) });
+    }
 
-  // own-property check so lookups like "constructor" can't hit the prototype chain
-  if (!Object.prototype.hasOwnProperty.call(stateLaws, key)) {
-    return apiError(`No laws found for state: ${state}`, 404);
+    const key = state.toLowerCase();
+    const law = Object.hasOwn(laws, key) ? laws[key] : null;
+
+    if (!law) {
+      return Response.json({ error: `No data for state: ${state}` }, { status: 404 });
+    }
+
+    const details = Object.hasOwn(stateDetails, key) ? stateDetails[key] : null;
+
+    return Response.json({
+      state: key,
+      law: details ? { ...law, ...details } : law,
+    });
+  } catch (err) {
+    return handleError(err);
   }
-
-  return Response.json({ state: key, laws: stateLaws[key] });
-});
+}

@@ -15,15 +15,15 @@ export default function AuthProvider({ children }) {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
+      setUser(data?.user ?? null);
       setLoading(false);
     });
 
-    const { data: sub } = supabase.auth.onAuthStateChange(
-      (_event, session) => setUser(session?.user ?? null)
-    );
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
 
-    return () => sub.subscription.unsubscribe();
+    return () => sub?.subscription?.unsubscribe();
   }, []);
 
   return (

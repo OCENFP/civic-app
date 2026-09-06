@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "../../../lib/supabase";
-import { signInWithGoogle } from "../../../lib/auth";
 
 export default function Signup() {
   const router = useRouter();
@@ -12,16 +11,12 @@ export default function Signup() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  async function signup(e) {
+  async function handleSignup(e) {
     e.preventDefault();
-    setLoading(true);
     setError("");
 
     const { data, error } = await supabase.auth.signUp({ email, password });
-
-    setLoading(false);
 
     if (error) {
       setError(error.message);
@@ -36,12 +31,13 @@ export default function Signup() {
     <div>
       <h1>Sign Up</h1>
 
-      <form onSubmit={signup}>
+      <form onSubmit={handleSignup}>
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"
+          aria-label="Email"
           required
         />
         <input
@@ -49,16 +45,12 @@ export default function Signup() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password (6+ characters)"
+          aria-label="Password"
           minLength={6}
           required
         />
-
-        <button className="btn" type="submit" disabled={loading}>
-          {loading ? "Creating account..." : "Sign Up"}
-        </button>
+        <button type="submit" className="btn">Create Account</button>
       </form>
-
-      <button onClick={signInWithGoogle}>Continue with Google</button>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
       {message && <p>{message}</p>}

@@ -1,13 +1,11 @@
 "use client";
 
-import Navbar from "../../../components/Navbar";
 import ChatUI from "../../../components/ChatUI";
 
-export default function Chat() {
+export default function ChatPage() {
   return (
     <div>
-      <Navbar />
-      <h1>Ask About Your Rights</h1>
+      <h1>Ask a Rights Question</h1>
       <ChatUI />
     </div>
   );

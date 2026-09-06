@@ -1,58 +1,124 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import ProtectedRoute from "../../components/auth/ProtectedRoute";
-import Navbar from "../../components/Navbar";
-import ScenarioCard from "../../components/ScenarioCard";
-import TrainingResult from "../../components/TrainingResult";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import scenarios from "../../data/scenarios.json";
+import ScenarioCard from "../../components/ScenarioCard";
+import Loader from "../../components/Loader";
+import TrainingResult from "../../components/TrainingResult";
 import { updateProgress } from "../../engine/trainEngine";
 import { playSound } from "../../engine/sound";
-import { getUser } from "../../lib/auth";
+import { shareResult } from "../../engine/share";
+import { generateShare } from "../../engine/growth/growthEngine";
+import { useAuth } from "../../components/auth/AuthProvider";
 
-export default function TrainPage() {
-  const scenario = scenarios[0];
+function Trainer() {
+  const { user } = useAuth();
+  const searchParams = useSearchParams();
+  // Deep links from the daily challenge: /train?scenario=<id>
+  const [scenario, setScenario] = useState(
+    () => scenarios.find((s) => s.id === searchParams.get("scenario")) ?? null
+  );
   const [stepId, setStepId] = useState("start");
   const [feedback, setFeedback] = useState("");
-  const [user, setUser] = useState(null);
+  const [score, setScore] = useState(0);
 
-  useEffect(() => {
-    getUser().then(setUser);
-  }, []);
+  function startScenario(s) {
+    setScenario(s);
+    setStepId("start");
+    setFeedback("");
+    setScore(0);
+  }
+
+  if (!scenario) {
+    return (
+      <div>
+        <h1>Training</h1>
+        <p>Pick a scenario and practice protecting your rights under pressure.</p>
+
+        {scenarios.map((s) => (
+          <div key={s.id} className="card">
+            <h2>{s.title}</h2>
+            <p>{s.description}</p>
+            <button className="btn" onClick={() => startScenario(s)}>
+              Start
+            </button>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   const step = scenario.steps[stepId];
 
-  function handleChoice(choice) {
+  function choose(choice) {
     setFeedback(choice.feedback);
-    playSound(choice.correct ? "correct" : "incorrect");
+
+    if (choice.correct) {
+      setScore((s) => s + 1);
+      playSound("correct");
+    } else {
+      playSound("incorrect");
+    }
+
     updateProgress({ correct: choice.correct, user });
     setStepId(choice.next);
   }
 
-  function restart() {
-    setStepId("start");
-    setFeedback("");
+  if (step?.end) {
+    return (
+      <div>
+        <h1>{scenario.title}</h1>
+        <div className="card">
+          <h2>{step.result}</h2>
+          <p>Correct choices: {score}</p>
+          <button
+            className="btn"
+            onClick={() =>
+              shareResult(
+                generateShare(`I scored ${score} on "${scenario.title}" — ${step.result}`)
+              )
+            }
+          >
+            Share Result
+          </button>
+          <button
+            className="btn"
+            style={{ marginLeft: 8 }}
+            onClick={() => startScenario(scenario)}
+          >
+            Try Again
+          </button>
+          <button
+            className="btn"
+            style={{ marginLeft: 8 }}
+            onClick={() => setScenario(null)}
+          >
+            All Scenarios
+          </button>
+        </div>
+
+        <TrainingResult />
+      </div>
+    );
   }
 
   return (
-    <ProtectedRoute>
-      <div>
-        <Navbar />
+    <div>
+      <h1>{scenario.title}</h1>
+      <p>{scenario.description}</p>
 
-        <h1>{scenario.title}</h1>
-        <p>{scenario.description}</p>
+      <ScenarioCard step={step} onChoose={choose} />
 
-        <ScenarioCard step={step} feedback={feedback} onChoice={handleChoice} />
+      {feedback && <p><em>{feedback}</em></p>}
+    </div>
+  );
+}
 
-        {step?.end && (
-          <>
-            <TrainingResult />
-            <button className="btn" onClick={restart}>
-              Try Again
-            </button>
-          </>
-        )}
-      </div>
-    </ProtectedRoute>
+export default function TrainPage() {
+  return (
+    <Suspense fallback={<Loader />}>
+      <Trainer />
+    </Suspense>
   );
 }
