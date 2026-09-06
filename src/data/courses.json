@@ -78,5 +78,54 @@
         ]
       }
     ]
+  },
+  {
+    "id": "if_arrested",
+    "title": "If You Are Arrested",
+    "description": "What to do and say from the moment of arrest through booking",
+    "modules": [
+      {
+        "id": "arrest_basics",
+        "title": "During and After Arrest",
+        "lessons": [
+          {
+            "title": "Miranda Rights",
+            "explanation": "Police must inform you of your rights before custodial interrogation",
+            "when_applies": "You are in custody and being questioned",
+            "example": "Officers begin asking questions after handcuffing you",
+            "risk": "Anything you say can be used against you",
+            "action": "Invoke your rights out loud \u2014 silence alone is not enough",
+            "script": "I am invoking my right to remain silent. I want a lawyer."
+          },
+          {
+            "title": "Booking Questions",
+            "explanation": "Basic identity questions at booking are routine; questions about the case are not",
+            "when_applies": "Being processed at the station",
+            "example": "You are asked your name and address, then about the incident",
+            "risk": "Case questions disguised as paperwork",
+            "action": "Answer identity questions only; decline everything about the case",
+            "script": "I will answer booking questions, but nothing else without my lawyer."
+          },
+          {
+            "title": "Jail Calls Are Recorded",
+            "explanation": "Calls from custody are typically recorded, except properly arranged attorney calls",
+            "when_applies": "Any phone call from jail",
+            "example": "Calling family after booking",
+            "risk": "Statements on recorded lines become evidence",
+            "action": "Never discuss the case on a jail phone",
+            "script": "I can't talk about the case on this line."
+          },
+          {
+            "title": "Asking for a Lawyer",
+            "explanation": "Once you clearly ask for a lawyer, questioning must stop",
+            "when_applies": "Any point during custody or interrogation",
+            "example": "An interview continues after your request",
+            "risk": "Ambiguous requests ('maybe I need a lawyer?') may not count",
+            "action": "Ask clearly and repeat it if questioning continues",
+            "script": "I want a lawyer. I will not answer questions."
+          }
+        ]
+      }
+    ]
   }
 ]

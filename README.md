@@ -1,5 +1,7 @@
 # Know Your Rights AI — TheFreedomPartyUSA
 
+![CI](https://github.com/OCENFP/civic-app/actions/workflows/ci.yml/badge.svg)
+
 Civic education for real-world application: learn your rights, train on
 branching real-world scenarios, and ask an AI assistant grounded in
 constitutional source material.

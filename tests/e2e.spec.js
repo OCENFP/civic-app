@@ -5,6 +5,17 @@ test("home page renders", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /Know Your Rights AI/i }).first()).toBeVisible();
 });
 
+test("chat falls back to offline constitutional scripts when AI is unavailable", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("Your question").fill("Can police search my car?");
+  await page.getByRole("button", { name: "Send" }).click();
+
+  // No OpenAI key in test env → the API errors → offline fallback answers
+  await expect(page.getByText(/Offline answer/i)).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByText(/I do not consent to searches/)).toBeVisible();
+  await expect(page.getByText("Sources: 4th Amendment")).toBeVisible();
+});
+
 test("learn shows the course and state-law lookup works", async ({ page }) => {
   await page.goto("/learn");
   await expect(page.getByRole("heading", { name: "Freedom 101" })).toBeVisible();
