@@ -17,6 +17,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx eslint src --ext .js,.jsx
+      - run: python3 scripts/validate_data.py
       - run: npm run build
 
   e2e:

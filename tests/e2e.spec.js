@@ -21,7 +21,7 @@ test("training scenario plays through to a win", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Training" })).toBeVisible();
 
   await page
-    .locator(".card", { hasText: "Traffic Stop" })
+    .locator(".card", { hasText: "Traffic Stop: Search & Questions" })
     .getByRole("button", { name: "Start" })
     .click();
 
