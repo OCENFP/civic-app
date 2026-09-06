@@ -46,7 +46,7 @@ payments activate once the corresponding keys are set in `.env.local`
 - `/` — quick Ask AI
 - `/learn` — courses and lessons
 - `/train` — branching scenario trainer (XP, streaks, sounds, share)
-- `/leaderboard` — top users by XP (Supabase `users` table)
+- `/leaderboard` — top users by XP (Supabase `progress` table, anonymized)
 - `/login`, `/signup` — Supabase auth (email/password + Google OAuth)
 - `/dashboard`, `/chat`, `/profile` — protected (require login)
 - `/civic` — representatives, bill search, recent votes (needs the FastAPI
