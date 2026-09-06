@@ -1,18 +1,21 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from openai import OpenAI
 import os
 import json
 from dotenv import load_dotenv
 
-from services.google_civic_api import get_representatives
-from services.bills_api import search_bills
-from services.voting_api import search_votes
-
 # -----------------------
 # ENV SETUP
 # -----------------------
+# Load .env BEFORE importing services: they read env vars at import time.
 load_dotenv()
+
+from services.google_civic_api import get_representatives
+from services.bills_api import search_bills
+from services.voting_api import search_votes
+from rate_limit import is_rate_limited
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
@@ -22,9 +25,15 @@ client = OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
 # -----------------------
 app = FastAPI(title="Civic API", version="1.0")
 
+# Origins are read from ALLOWED_ORIGINS (comma-separated) so credentialed
+# requests get a real allowlist instead of "*", which browsers reject when
+# allow_credentials is True.
+_allowed = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:3001")
+ALLOWED_ORIGINS = [o.strip() for o in _allowed.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # tighten later for production
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -33,9 +42,11 @@ app.add_middleware(
 # -----------------------
 # SAFE JSON LOADER
 # -----------------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 def load_json_file(path):
     try:
-        with open(path, "r") as f:
+        with open(os.path.join(BASE_DIR, path), "r") as f:
             return json.load(f)
     except Exception as e:
         print(f"[ERROR] Failed loading {path}: {e}")
@@ -101,7 +112,14 @@ def health():
 # RIGHTS AI
 # -----------------------
 @app.get("/ask")
-def ask(question: str):
+def ask(question: str, request: Request):
+    client_ip = request.client.host if request.client else "unknown"
+    if is_rate_limited(client_ip, limit=10, window_seconds=60):
+        raise HTTPException(status_code=429, detail="Too many requests. Try again shortly.")
+
+    if len(question) > 2000:
+        raise HTTPException(status_code=400, detail="Question too long (max 2000 chars).")
+
     section = find_relevant_section(question)
     context = section["content"] if section else "No legal match found"
 
@@ -144,6 +162,27 @@ Respond clearly:
         "answer": answer,
         "source": section["title"] if section else "None"
     }
+
+
+class AskBody(BaseModel):
+    question: str
+
+
+# POST variant so web/mobile clients can send the question in a JSON body.
+@app.post("/ask")
+def ask_post(body: AskBody, request: Request):
+    return ask(body.question, request)
+
+
+# -----------------------
+# LEARN
+# -----------------------
+@app.get("/learn")
+def learn(topic: str = ""):
+    section = find_relevant_section(topic)
+    if not section:
+        return {"topic": topic, "result": None, "message": "No matching section found."}
+    return {"topic": topic, "result": section}
 
 # -----------------------
 # REPRESENTATIVES

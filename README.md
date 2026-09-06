@@ -1,39 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Know Your Rights AI — TheFreedomPartyUSA
 
-## Getting Started
+![CI](https://github.com/OCENFP/civic-app/actions/workflows/ci.yml/badge.svg)
 
-First, run the development server:
+Civic education for real-world application: learn your rights, train on
+branching real-world scenarios, and ask an AI assistant grounded in
+constitutional source material.
+
+## Repository layout
+
+| Path | What it is |
+|---|---|
+| `src/` | Main Next.js web app (App Router) |
+| `backend/` | FastAPI civic-data API (representatives, bills, votes, lobbying, rights Q&A) |
+| `data_pipeline/` | Scripts that pull Congress.gov data into a local SQLite DB |
+| `frontend/` | Secondary Next.js starter (untouched scaffold) |
+| `frontend/mobile/` | Expo (React Native) starter app |
+
+## Web app (Next.js)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # fill in your keys
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Production:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build
+npm run start
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Lint:
 
-## Learn More
+```bash
+npx eslint src --ext .js,.jsx
+```
 
-To learn more about Next.js, take a look at the following resources:
+The app builds and runs without any env vars; auth, AI answers, and
+payments activate once the corresponding keys are set in `.env.local`
+(see `.env.example`).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Routes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `/` — quick Ask AI
+- `/learn` — courses and lessons
+- `/train` — branching scenario trainer (XP, streaks, sounds, share)
+- `/leaderboard` — top users by XP (Supabase `progress` table, anonymized)
+- `/login`, `/signup` — Supabase auth (email/password + Google OAuth)
+- `/dashboard`, `/chat`, `/profile` — protected (require login)
+- `/civic` — representatives, bill search, recent votes (needs the FastAPI
+  backend; set `NEXT_PUBLIC_BACKEND_URL`, default `http://localhost:10000`)
+- `/onboarding` — first-run flow; `/admin` — scenario generator (login required)
+- API: `/api/ask`, `/api/auth`, `/api/daily`, `/api/embeddings`,
+  `/api/generate`, `/api/laws?state=texas`, `/api/progress`,
+  `/api/stripe`, `/api/voice`
 
-## Deploy on Vercel
+### Supabase setup
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Run `supabase/schema.sql` against your project (SQL editor or
+`supabase db push`) — it creates both tables below with row-level
+security (public anonymized leaderboard reads, owner-only writes).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# TheFreedomPartyUSA
-# TheFreedomPartyUSA
-# TheFreedomPartyUSA
+### Supabase tables used
+
+- `history` (`user_id`, `question`, `answer`) — Q&A history
+- `progress` (`user_id` unique, `xp`, `streak`, `updated_at`) — training progress; also drives the leaderboard (anonymized)
+
+Authenticated API calls (`/api/progress`, history saves in `/api/ask`) derive
+identity from the Supabase access token in the `Authorization` header — never
+from client-supplied IDs.
+
+## Backend (FastAPI)
+
+```bash
+cd backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+./start.sh                   # http://localhost:10000, docs at /docs
+```
+
+Env: `OPENAI_API_KEY` (rights Q&A), `GOOGLE_API_KEY` (representatives).
+Endpoints: `/`, `/health`, `/ask?question=`, `/representatives?address=`,
+`/bills?query=`, `/votes?query=`, `/lobbying?name=`.
+
+## Data pipeline
+
+```bash
+export CONGRESS_API_KEY=your_key   # https://api.congress.gov/sign-up/
+cd data_pipeline
+python3 fetch_congress.py          # pull members into ../backend/freedomparty.db
+python3 district_lookup.py         # look up reps by ZIP
+```
+
+## Mobile (Expo)
+
+```bash
+cd frontend/mobile
+npm install
+EXPO_PUBLIC_API_URL=http://<your-machine-ip>:3000 npx expo start
+```
+
+The home tab asks the web app's `/api/ask` endpoint. `EXPO_PUBLIC_API_URL`
+must point at a reachable instance of the web app (a device can't reach
+`localhost`); it defaults to `http://localhost:3000` for web preview.

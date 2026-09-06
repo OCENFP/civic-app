@@ -1,21 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getUser } from "../lib/auth";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "./auth/AuthProvider";
 
 export default function ProtectedRoute({ children }) {
-  const [user, setUser] = useState(null);
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    getUser().then((u) => {
-      if (!u) router.push("/");
-      else setUser(u);
-    });
-  }, []);
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [loading, user, router]);
 
-  if (!user) return <p>Loading...</p>;
+  if (loading || !user) return <p>Loading...</p>;
 
   return children;
 }

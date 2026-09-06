@@ -1,35 +1,27 @@
 "use client";
 
-import { useState } from "react";
-import Loader from "../components/Loader";
+import Link from "next/link";
+import ChatUI from "../components/ChatUI";
 
 export default function Home() {
-  const [loading, setLoading] = useState(false);
-  const [answer, setAnswer] = useState("");
-
-  async function askAI(q) {
-    setLoading(true);
-
-    const res = await fetch("/api/ask", {
-      method: "POST",
-      body: JSON.stringify({ question: q }),
-    });
-
-    const data = await res.json();
-
-    setAnswer(data.answer);
-    setLoading(false);
-  }
-
   return (
     <div>
-      <h1>🇺🇸 Know Your Rights AI</h1>
+      <h1>Know your rights. Keep them.</h1>
+      <p>
+        Ask questions grounded in constitutional source material, learn what
+        applies to you, and train on real-world scenarios until asserting your
+        rights is second nature.
+      </p>
 
-      <button onClick={() => askAI("Do I need a lawyer?")}>
-        Ask
-      </button>
+      <div style={{ display: "flex", gap: 8, margin: "14px 0" }}>
+        <Link href="/learn" className="btn">📚 Learn</Link>
+        <Link href="/train" className="btn">🎯 Train</Link>
+      </div>
 
-      {loading ? <Loader /> : <p>{answer}</p>}
+      <div className="card">
+        <h2>Ask a question</h2>
+        <ChatUI />
+      </div>
     </div>
   );
 }

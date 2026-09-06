@@ -12,7 +12,7 @@ export default function LessonCard({ lesson }) {
       <p><strong>Do:</strong> {lesson.action}</p>
 
       <div style={{ marginTop: 10, fontWeight: "bold" }}>
-        👉 "{lesson.script}"
+        👉 &quot;{lesson.script}&quot;
       </div>
     </div>
   );

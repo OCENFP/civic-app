@@ -1,30 +1,37 @@
 import { trackEvent } from "./analytics";
+import { loadProgress, saveProgress } from "./storage";
+import { emitProgressChange } from "./useProgress";
+import { authHeaders } from "../lib/auth";
 
 export function updateProgress({ correct, user }) {
-  let xp = parseInt(localStorage.getItem("xp") || "0");
-  let streak = parseInt(localStorage.getItem("streak") || "0");
+  const progress = loadProgress();
 
   if (correct) {
-    xp += 10;
-    streak += 1;
+    progress.xp += 10;
+    progress.streak += 1;
   } else {
-    streak = 0;
+    progress.streak = 0;
   }
 
-  localStorage.setItem("xp", xp);
-  localStorage.setItem("streak", streak);
+  progress.lastActive = new Date().toDateString();
 
-  trackEvent("progress_update", { xp, streak });
+  saveProgress(progress);
+  emitProgressChange();
 
-  // 🔥 SEND TO DATABASE
-  fetch("/api/progress", {
-    method: "POST",
-    body: JSON.stringify({
-      userId: user?.id,
-      xp,
-      streak,
-    }),
-  });
+  trackEvent("progress_update", { xp: progress.xp, streak: progress.streak });
 
-  return { xp, streak };
+  // 🔥 SEND TO DATABASE (fire-and-forget; identity travels via auth token)
+  if (user) {
+    authHeaders()
+      .then((headers) =>
+        fetch("/api/progress", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ xp: progress.xp, streak: progress.streak }),
+        })
+      )
+      .catch(() => {});
+  }
+
+  return progress;
 }

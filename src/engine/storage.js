@@ -1,15 +1,31 @@
+const DEFAULT_PROGRESS = { xp: 0, level: 1, streak: 0, lastActive: null };
+
 export function loadProgress() {
-  const data = localStorage.getItem("progress");
+  try {
+    const data = localStorage.getItem("progress");
+    if (!data) return { ...DEFAULT_PROGRESS };
 
-  if (!data) {
-    return { xp: 0, level: 1, streak: 0, lastActive: null };
+    const parsed = JSON.parse(data);
+    if (!parsed || typeof parsed !== "object") return { ...DEFAULT_PROGRESS };
+
+    return {
+      ...DEFAULT_PROGRESS,
+      ...parsed,
+      xp: Number.isFinite(parsed.xp) ? parsed.xp : 0,
+      streak: Number.isFinite(parsed.streak) ? parsed.streak : 0,
+    };
+  } catch {
+    // Corrupt or inaccessible localStorage must never crash the app
+    return { ...DEFAULT_PROGRESS };
   }
-
-  return JSON.parse(data);
 }
 
 export function saveProgress(data) {
-  localStorage.setItem("progress", JSON.stringify(data));
+  try {
+    localStorage.setItem("progress", JSON.stringify(data));
+  } catch {
+    // Storage full or blocked — progress just stays in memory
+  }
 }
 
 export function calculateLevel(xp) {

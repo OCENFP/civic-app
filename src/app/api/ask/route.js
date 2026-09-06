@@ -1,14 +1,38 @@
 import { supabase } from "../../../lib/supabase";
 import { openai } from "../../../lib/openai";
 import { getEmbedding, cosineSimilarity } from "../../../lib/embeddings";
+import { getUserFromRequest } from "../../../lib/serverAuth";
+import { handleError } from "../../../lib/errorHandler";
+import { rateLimit } from "../../../lib/rateLimit";
 import data from "../../../data/constitution.json";
+
+// The corpus is static, so embed each document at most once per server
+// lifetime instead of re-embedding all ~15 documents on every request.
+const embeddingCache = new Map();
+
+async function getDocEmbedding(item) {
+  if (item.embedding && item.embedding.length > 0) return item.embedding;
+
+  const cached = embeddingCache.get(item.title);
+  if (cached) return cached;
+
+  const embedding = await getEmbedding(item.text);
+  embeddingCache.set(item.title, embedding);
+  return embedding;
+}
 
 export async function POST(req) {
   try {
-    const { question, userId } = await req.json();
+    const limited = rateLimit(req, { limit: 10, windowMs: 60_000 });
+    if (limited) return limited;
 
-    if (!question) {
+    const { question } = await req.json();
+
+    if (typeof question !== "string" || !question.trim()) {
       return Response.json({ error: "No question provided" }, { status: 400 });
+    }
+    if (question.length > 2000) {
+      return Response.json({ error: "Question too long (max 2000 chars)" }, { status: 400 });
     }
 
     // STEP 1: Embed user query
@@ -17,15 +41,8 @@ export async function POST(req) {
     // STEP 2: Compare with all documents
     const scored = await Promise.all(
       data.map(async (item) => {
-        let embedding = item.embedding;
-
-        // Generate embedding if missing
-        if (!embedding || embedding.length === 0) {
-          embedding = await getEmbedding(item.text);
-        }
-
+        const embedding = await getDocEmbedding(item);
         const score = cosineSimilarity(queryEmbedding, embedding);
-
         return { ...item, score };
       })
     );
@@ -71,10 +88,12 @@ If unsure, say "I don't know".
 
     const answer = completion.choices[0].message.content;
 
-    // STEP 5: Save history
-    if (userId) {
+    // STEP 5: Save history for the verified user only — identity comes
+    // from the token, never from a client-supplied field.
+    const user = await getUserFromRequest(req);
+    if (user) {
       await supabase.from("history").insert({
-        user_id: userId,
+        user_id: user.id,
         question,
         answer,
       });
@@ -85,7 +104,6 @@ If unsure, say "I don't know".
       sources: topMatches.map((m) => m.title),
     });
   } catch (err) {
-    console.error(err);
-    return Response.json({ error: err.message }, { status: 500 });
+    return handleError(err);
   }
 }
