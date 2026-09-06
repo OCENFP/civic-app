@@ -2,6 +2,9 @@ const { defineConfig } = require("@playwright/test");
 
 module.exports = defineConfig({
   testDir: "./tests",
+  // e2e specs only — Vitest owns tests/*.test.js, so exclude those here
+  // (Playwright's default matcher would otherwise pick up .test.js too).
+  testMatch: "**/*.spec.js",
   timeout: 30_000,
   use: {
     baseURL: "http://localhost:3000",

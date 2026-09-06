@@ -77,7 +77,7 @@ export default function TrainingResult() {
           </button>
         )}
         <button className="btn" onClick={share}>
-          Share result
+          Share my progress
         </button>
       </div>
 
